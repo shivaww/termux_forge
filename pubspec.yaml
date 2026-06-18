@@ -64,7 +64,7 @@ dependencies:
   url_launcher: ^6.3.1
   
   # Markdown
-  flutter_markdown: ^0.7.7+2
+  flutter_markdown: ^0.7.7+1
   
   # Charts for dashboards
   fl_chart: ^0.70.2
