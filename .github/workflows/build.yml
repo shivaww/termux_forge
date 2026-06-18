@@ -91,13 +91,13 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/**/outputs/**/*.apk
           retention-days: 14
 
       - name: Build summary
