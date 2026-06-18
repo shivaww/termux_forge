@@ -18,3 +18,21 @@ tasks.register<Delete>("clean") {
 subprojects {
     project.evaluationDependsOn(":app")
 }
+
+subprojects {
+    afterEvaluate {
+        try {
+            val android = extensions.findByName("android") as? com.android.build.gradle.LibraryExtension
+            if (android != null && android.namespace == null) {
+                val manifestFile = file("src/main/AndroidManifest.xml")
+                if (manifestFile.exists()) {
+                    val content = manifestFile.readText()
+                    val matcher = java.util.regex.Pattern.compile("""package="([^"]+)"""").matcher(content)
+                    if (matcher.find()) {
+                        android.namespace = matcher.group(1)
+                    }
+                }
+            }
+        } catch (ignored: Exception) {}
+    }
+}
