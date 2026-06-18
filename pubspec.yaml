@@ -83,6 +83,7 @@ dev_dependencies:
   build_runner: any
   freezed: any
   json_serializable: any
+  flutter_launcher_icons: any
   isar_generator: ^3.1.0
   mockito: any
   integration_test:
@@ -111,3 +112,8 @@ flutter:
         - asset: assets/fonts/JetBrainsMono-Regular.ttf
         - asset: assets/fonts/JetBrainsMono-Bold.ttf
           weight: 700
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
