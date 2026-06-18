@@ -18,8 +18,8 @@ dependencies:
   animations: ^2.0.11
   
   # State Management
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: any
+  riverpod_annotation: any
   
   # Navigation
   go_router: ^14.8.1
@@ -54,8 +54,8 @@ dependencies:
   intl: ^0.20.2
   collection: ^1.19.1
   equatable: ^2.0.7
-  freezed_annotation: ^3.0.0
-  json_annotation: ^4.9.0
+  freezed_annotation: any
+  json_annotation: any
   logger: ^2.5.0
   
   # Platform
@@ -79,10 +79,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  riverpod_generator: ^2.6.3
+  riverpod_generator: any
   build_runner: ^2.4.15
-  freezed: ^3.0.0
-  json_serializable: ^6.9.4
+  freezed: any
+  json_serializable: any
   isar_generator: ^3.1.0
   mockito: ^5.4.6
   integration_test:
