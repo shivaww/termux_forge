@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,8 +70,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
   Map<String, ProviderSettings> _settings = {};
   final Map<String, List<String>> _modelCache = {};
   var _selectedProviderId = providerCatalog.first.id;
-  var _isSending = false;
+  final Set<String> _sendingSessionIds = {};
   var _isFetchingModels = false;
+  SearchSettings _searchSettings = SearchSettings.defaults();
 
   List<ChatSession> _sessions = [];
   String? _activeSessionId;
@@ -201,7 +203,15 @@ class _ChatHomePageState extends State<ChatHomePage> {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_settingsKey);
     final selected = prefs.getString(_selectedProviderKey);
+    final searchRaw = prefs.getString('search_settings_v1');
     final nextSettings = <String, ProviderSettings>{};
+
+    SearchSettings loadedSearchSettings = SearchSettings.defaults();
+    if (searchRaw != null && searchRaw.trim().isNotEmpty) {
+      try {
+        loadedSearchSettings = SearchSettings.fromJson(jsonDecode(searchRaw));
+      } catch (_) {}
+    }
 
     if (raw != null && raw.trim().isNotEmpty) {
       try {
@@ -230,6 +240,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
     setState(() {
       _prefs = prefs;
       _settings = nextSettings;
+      _searchSettings = loadedSearchSettings;
       if (selected != null &&
           providerCatalog.any((provider) => provider.id == selected)) {
         _selectedProviderId = selected;
@@ -253,6 +264,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
     }
     await prefs.setString(_settingsKey, jsonEncode(metadata));
     await prefs.setString(_selectedProviderKey, _selectedProviderId);
+    await prefs.setString('search_settings_v1', jsonEncode(_searchSettings.toJson()));
   }
 
   Future<void> _selectProvider(String providerId) async {
@@ -348,88 +360,222 @@ class _ChatHomePageState extends State<ChatHomePage> {
     await _saveSettings();
   }
 
+  static const String searchSystemPrompt =
+      "You have access to a web search tool. If you need to search the web for information to answer the user's request, "
+      "you MUST output a single search query in the format: [SEARCH_REQUEST: your search query] and stop generating further text. "
+      "Do not explain that you are searching, just output the request tag. "
+      "Once the search results are provided to you, use them to formulate your final response.";
+
   Future<void> _sendMessage() async {
     final prompt = _messageController.text.trim();
-    if (prompt.isEmpty || _isSending) return;
+    if (prompt.isEmpty) return;
 
-    final provider = _provider;
-    final settings = _activeSettings;
+    final targetSessionId = _activeSessionId;
+    if (targetSessionId == null) return;
+    if (_sendingSessionIds.contains(targetSessionId)) return;
+
+    final sessionIndex = _sessions.indexWhere((s) => s.id == targetSessionId);
+    if (sessionIndex == -1) return;
+
+    final session = _sessions[sessionIndex];
+    final provider = providerCatalog.firstWhere((p) => p.id == session.providerId);
+    final baseSettings = _settings[session.providerId] ?? ProviderSettings.defaults(provider);
+    final settings = baseSettings.copyWith(
+      model: session.model.isNotEmpty ? session.model : baseSettings.model,
+      maxTokens: session.maxTokens ?? baseSettings.maxTokens,
+    );
+    final activeModel = session.model.isNotEmpty ? session.model : settings.model;
+
     if (provider.requiresKey && settings.apiKey.trim().isEmpty) {
       await _openProviderSheet(provider.id);
       return;
     }
 
-    _messageController.clear();
-    final userMessage = ChatMessage(role: MessageRole.user, text: prompt);
-    
-    final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
-    if (sessionIndex != -1) {
-      final session = _sessions[sessionIndex];
-      String updatedTitle = session.title;
-      if (session.title == 'Welcome Chat' || session.title == 'New Chat') {
-        updatedTitle = prompt.length > 25 ? '${prompt.substring(0, 25)}...' : prompt;
-      }
-      setState(() {
-        final updatedMessages = List<ChatMessage>.from(session.messages)..add(userMessage);
-        _sessions[sessionIndex] = session.copyWith(
-          messages: updatedMessages,
-          title: updatedTitle,
-          providerId: _selectedProviderId,
-          model: _activeModel,
-        );
-      });
+    if (targetSessionId == _activeSessionId) {
+      _messageController.clear();
     }
 
-    _scrollToBottom();
+    final userMessage = ChatMessage(
+      role: MessageRole.user,
+      text: prompt,
+      images: List<String>.from(session.attachedImagesBase64),
+    );
 
-    final assistantMessageIndex = _messages.length;
+    String updatedTitle = session.title;
+    if (session.title == 'Welcome Chat' || session.title == 'New Chat') {
+      updatedTitle = prompt.length > 25 ? '${prompt.substring(0, 25)}...' : prompt;
+    }
+
     setState(() {
-      _messages.add(const ChatMessage(role: MessageRole.assistant, text: ''));
-      _isSending = true;
+      _sendingSessionIds.add(targetSessionId);
+      final updatedMessages = List<ChatMessage>.from(session.messages)..add(userMessage);
+      _sessions[sessionIndex] = session.copyWith(
+        messages: updatedMessages,
+        title: updatedTitle,
+        attachedImagesBase64: const [],
+      );
     });
-    _scrollToBottom();
+
+    if (targetSessionId == _activeSessionId) {
+      _scrollToBottom();
+    }
+
+    int searchCount = 0;
+    bool shouldContinue = true;
 
     try {
-      final stream = _chatClient.sendChatStream(
-        provider: provider,
-        settings: settings,
-        model: _activeModel,
-        messages: _messages
-            .take(assistantMessageIndex)
-            .where((message) => message.role != MessageRole.system)
-            .toList(),
-      );
+      while (shouldContinue && searchCount < 3) {
+        final currentSession = _sessions[sessionIndex];
+        final assistantMessageIndex = currentSession.messages.length;
 
-      var fullText = '';
-      await for (final chunk in stream) {
-        if (!mounted) return;
-        fullText += chunk;
         setState(() {
-          _messages[assistantMessageIndex] = ChatMessage(
-            role: MessageRole.assistant,
-            text: fullText,
+          _sessions[sessionIndex] = currentSession.copyWith(
+            messages: [...currentSession.messages, const ChatMessage(role: MessageRole.assistant, text: '')],
           );
         });
-        _scrollToBottom();
+
+        if (targetSessionId == _activeSessionId) {
+          _scrollToBottom();
+        }
+
+        final List<ChatMessage> historyForApi = [
+          if (_searchSettings.enabled)
+            const ChatMessage(role: MessageRole.system, text: searchSystemPrompt),
+          ..._sessions[sessionIndex].messages
+              .take(assistantMessageIndex)
+              .where((message) => message.role != MessageRole.system)
+              .toList(),
+        ];
+
+        final stream = _chatClient.sendChatStream(
+          provider: provider,
+          settings: settings,
+          model: activeModel,
+          messages: historyForApi,
+        );
+
+        var fullText = '';
+        var reasoningText = '';
+        await for (final chunk in stream) {
+          if (!mounted) return;
+          if (chunk.startsWith('[REASONING]')) {
+            reasoningText += chunk.substring(11);
+          } else {
+            fullText += chunk;
+          }
+
+          setState(() {
+            final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
+            if (assistantMessageIndex < msgs.length) {
+              msgs[assistantMessageIndex] = ChatMessage(
+                role: MessageRole.assistant,
+                text: fullText,
+                reasoning: reasoningText,
+              );
+              _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
+            }
+          });
+
+          if (targetSessionId == _activeSessionId) {
+            _scrollToBottom();
+          }
+        }
+
+        // Post-process inline <think> tags if reasoningText is empty but fullText contains them
+        if (reasoningText.isEmpty && fullText.contains('<think>')) {
+          final thinkRegex = RegExp(r'<think>(.*?)</think>', dotAll: true);
+          final match = thinkRegex.firstMatch(fullText);
+          if (match != null) {
+            reasoningText = match.group(1)?.trim() ?? '';
+            fullText = fullText.replaceFirst(thinkRegex, '').trim();
+            setState(() {
+              final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
+              if (assistantMessageIndex < msgs.length) {
+                msgs[assistantMessageIndex] = ChatMessage(
+                  role: MessageRole.assistant,
+                  text: fullText,
+                  reasoning: reasoningText,
+                );
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
+              }
+            });
+          }
+        }
+
+        // Check if LLM requested web search
+        final searchRegex = RegExp(r'\[SEARCH_REQUEST:\s*(.*?)\]');
+        final match = searchRegex.firstMatch(fullText);
+        if (_searchSettings.enabled && match != null) {
+          final query = match.group(1)?.trim() ?? '';
+          searchCount++;
+
+          // Display search tag in UI
+          setState(() {
+            final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
+            if (assistantMessageIndex < msgs.length) {
+              msgs[assistantMessageIndex] = ChatMessage(
+                role: MessageRole.assistant,
+                text: '[SEARCH_REQUEST: $query]',
+                reasoning: reasoningText,
+              );
+              _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
+            }
+          });
+
+          // Perform actual search
+          final searchResult = await _chatClient.searchWeb(
+            query,
+            _searchSettings.provider,
+            _searchSettings.apiKey,
+            googleCx: _searchSettings.googleCx,
+          );
+
+          // Append search result as a system message
+          final resultsMessage = ChatMessage(
+            role: MessageRole.system,
+            text: "Web Search results for '$query':\n\n$searchResult",
+          );
+
+          setState(() {
+            _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(
+              messages: [..._sessions[sessionIndex].messages, resultsMessage],
+            );
+          });
+
+          if (targetSessionId == _activeSessionId) {
+            _scrollToBottom();
+          }
+        } else {
+          shouldContinue = false;
+        }
       }
       await _saveSessions();
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        final currentText = _messages[assistantMessageIndex].text;
-        _messages[assistantMessageIndex] = ChatMessage(
-          role: MessageRole.assistant,
-          text: currentText.isNotEmpty
-              ? '$currentText\n\n[Error: $error]'
-              : 'Request failed: $error',
-          isError: true,
-        );
+        final currentMessages = List<ChatMessage>.from(_sessions[sessionIndex].messages);
+        if (currentMessages.isNotEmpty) {
+          final lastIdx = currentMessages.length - 1;
+          final currentText = currentMessages[lastIdx].text;
+          currentMessages[lastIdx] = ChatMessage(
+            role: MessageRole.assistant,
+            text: currentText.isNotEmpty
+                ? '$currentText\n\n[Error: $error]'
+                : 'Request failed: $error',
+            isError: true,
+          );
+          _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: currentMessages);
+        }
       });
       await _saveSessions();
     } finally {
       if (mounted) {
-        setState(() => _isSending = false);
-        _scrollToBottom();
+        setState(() {
+          _sendingSessionIds.remove(targetSessionId);
+        });
+        if (targetSessionId == _activeSessionId) {
+          _scrollToBottom();
+        }
       }
     }
   }
@@ -470,27 +616,80 @@ class _ChatHomePageState extends State<ChatHomePage> {
           provider: provider,
           settings: settings,
           cachedModels: models,
-          onProviderChanged: (newProviderId) async {
+          searchSettings: _searchSettings,
+          onSearchSettingsChanged: (nextSearchSettings) async {
             setState(() {
-              _selectedProviderId = newProviderId;
+              _searchSettings = nextSearchSettings;
             });
             await _saveSettings();
+          },
+          onImageAttached: (base64Content) {
+            setState(() {
+              final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
+              if (sessionIndex != -1) {
+                final list = List<String>.from(_sessions[sessionIndex].attachedImagesBase64)..add(base64Content);
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(attachedImagesBase64: list);
+              }
+            });
+            _saveSessions();
+          },
+          onProviderChanged: (newProviderId) async {
             final nextProvider = providerCatalog.firstWhere((p) => p.id == newProviderId);
             final nextSettings = _settings[newProviderId] ?? ProviderSettings.defaults(nextProvider);
             final nextModel = nextSettings.model.isNotEmpty ? nextSettings.model : nextProvider.models.first;
             setState(() {
+              _selectedProviderId = newProviderId;
               _settings[newProviderId] = nextSettings.copyWith(model: nextModel);
+              
+              final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
+              if (sessionIndex != -1) {
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(
+                  providerId: newProviderId,
+                  model: nextModel,
+                  maxTokens: nextSettings.maxTokens,
+                );
+              }
             });
+            await _saveSettings();
+            await _saveSessions();
           },
           onModelChanged: (newModel) async {
             setState(() {
-              _settings[provider.id] = settings.copyWith(model: newModel);
+              final currentProv = _selectedProviderId;
+              final currentSettings = _settings[currentProv] ?? ProviderSettings.defaults(_provider);
+              _settings[currentProv] = currentSettings.copyWith(model: newModel);
+              
+              final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
+              if (sessionIndex != -1) {
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(
+                  model: newModel,
+                );
+              }
             });
             await _saveSettings();
+            await _saveSessions();
           },
           onMaxTokensChanged: (newMaxTokens) async {
             setState(() {
-              _settings[provider.id] = settings.copyWith(maxTokens: newMaxTokens);
+              final currentProv = _selectedProviderId;
+              final currentSettings = _settings[currentProv] ?? ProviderSettings.defaults(_provider);
+              _settings[currentProv] = currentSettings.copyWith(maxTokens: newMaxTokens);
+              
+              final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
+              if (sessionIndex != -1) {
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(
+                  maxTokens: newMaxTokens,
+                );
+              }
+            });
+            await _saveSettings();
+            await _saveSessions();
+          },
+          onReasoningEnabledChanged: (enabled) async {
+            setState(() {
+              final currentProv = _selectedProviderId;
+              final currentSettings = _settings[currentProv] ?? ProviderSettings.defaults(_provider);
+              _settings[currentProv] = currentSettings.copyWith(reasoningEnabled: enabled);
             });
             await _saveSettings();
           },
@@ -501,6 +700,38 @@ class _ChatHomePageState extends State<ChatHomePage> {
         );
       },
     );
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
+      if (sessionIndex != -1) {
+        final list = List<String>.from(_sessions[sessionIndex].attachedImagesBase64);
+        if (index >= 0 && index < list.length) {
+          list.removeAt(index);
+          _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(attachedImagesBase64: list);
+        }
+      }
+    });
+    _saveSessions();
+  }
+
+  void _editUserMessage(int index) {
+    setState(() {
+      final sessionIndex = _sessions.indexWhere((s) => s.id == _activeSessionId);
+      if (sessionIndex != -1) {
+        final session = _sessions[sessionIndex];
+        final messages = List<ChatMessage>.from(session.messages);
+        if (index >= 0 && index < messages.length) {
+          final targetMessage = messages[index];
+          _messageController.text = targetMessage.text;
+          // Clear target message and all subsequent messages
+          messages.removeRange(index, messages.length);
+          _sessions[sessionIndex] = session.copyWith(messages: messages);
+        }
+      }
+    });
+    _saveSessions();
   }
 
   void _scrollToBottom() {
@@ -514,10 +745,21 @@ class _ChatHomePageState extends State<ChatHomePage> {
     });
   }
 
+  ChatSession get _activeSession {
+    if (_sessions.isEmpty) {
+      _initDefaultSession();
+    }
+    return _sessions.firstWhere(
+      (s) => s.id == _activeSessionId,
+      orElse: () => _sessions.first,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final wide = width >= 840;
+    final activeSession = _activeSession;
     
     final chatHistoryPanel = ChatHistoryPanel(
       sessions: _sessions,
@@ -545,11 +787,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 messages: _messages,
                 messageController: _messageController,
                 scrollController: _scrollController,
-                isSending: _isSending,
+                isSending: _sendingSessionIds.contains(_activeSessionId),
                 onOpenProvider: () => _openProviderSheet(_selectedProviderId),
                 onOpenModel: _openModelSheet,
                 onSend: _sendMessage,
                 onPlusPressed: _openPlusBottomSheet,
+                attachedImages: activeSession.attachedImagesBase64,
+                onRemoveImage: _removeImage,
+                onEditUserMessage: _editUserMessage,
               ),
             ),
           ],
@@ -673,6 +918,9 @@ class ChatSurface extends StatelessWidget {
     required this.onOpenModel,
     required this.onSend,
     required this.onPlusPressed,
+    required this.attachedImages,
+    required this.onRemoveImage,
+    required this.onEditUserMessage,
     super.key,
   });
 
@@ -687,6 +935,9 @@ class ChatSurface extends StatelessWidget {
   final VoidCallback onOpenModel;
   final VoidCallback onSend;
   final VoidCallback onPlusPressed;
+  final List<String> attachedImages;
+  final ValueChanged<int> onRemoveImage;
+  final ValueChanged<int> onEditUserMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -723,6 +974,10 @@ class ChatSurface extends StatelessWidget {
                 return MessageBubble(
                   message: messages[index],
                   index: index,
+                  providerShortName: provider.shortName,
+                  providerName: provider.name,
+                  reasoningEnabled: settings.reasoningEnabled,
+                  onEditUserMessage: () => onEditUserMessage(index),
                 );
               },
             ),
@@ -732,6 +987,8 @@ class ChatSurface extends StatelessWidget {
             isSending: isSending,
             onSend: onSend,
             onPlusPressed: onPlusPressed,
+            attachedImages: attachedImages,
+            onRemoveImage: onRemoveImage,
           ),
         ],
       ),
@@ -862,26 +1119,397 @@ String formatMathText(String text) {
   return formatted;
 }
 
+class ThoughtBlock extends StatefulWidget {
+  const ThoughtBlock({required this.thought, super.key});
+  final String thought;
+
+  @override
+  State<ThoughtBlock> createState() => _ThoughtBlockState();
+}
+
+class _ThoughtBlockState extends State<ThoughtBlock> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F2E8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFDCCBB8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  const Icon(Icons.psychology_outlined, size: 18, color: Color(0xFF7B4E2E)),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Thought Process',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6C5946),
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: const Color(0xFF6C5946),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+              child: Text(
+                widget.thought,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontStyle: FontStyle.italic,
+                  color: Color(0xFF5C4E40),
+                  height: 1.4,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class CodeBlockWidget extends StatelessWidget {
+  const CodeBlockWidget({
+    required this.code,
+    required this.language,
+    required this.onSave,
+    super.key,
+  });
+
+  final String code;
+  final String language;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: const BoxDecoration(
+              color: Color(0xFF2D2D2D),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.code, size: 16, color: Color(0xFFDCCBB8)),
+                const SizedBox(width: 8),
+                Text(
+                  language.toUpperCase(),
+                  style: const TextStyle(
+                    color: Color(0xFFDCCBB8),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  tooltip: 'Copy code',
+                  icon: const Icon(Icons.copy_all_outlined, size: 18, color: Color(0xFFDCCBB8)),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: code));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Code copied to clipboard')),
+                    );
+                  },
+                ),
+                IconButton(
+                  tooltip: 'Save file',
+                  icon: const Icon(Icons.download_rounded, size: 18, color: Color(0xFFDCCBB8)),
+                  onPressed: onSave,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: SelectableText(
+              code,
+              style: GoogleFonts.jetBrainsMono(
+                color: const Color(0xFFE5C07B),
+                fontSize: 13,
+                height: 1.45,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String getExtension(String lang) {
+  switch (lang.toLowerCase()) {
+    case 'python': case 'py': return 'py';
+    case 'dart': return 'dart';
+    case 'javascript': case 'js': return 'js';
+    case 'typescript': case 'ts': return 'ts';
+    case 'html': return 'html';
+    case 'css': return 'css';
+    case 'json': return 'json';
+    case 'bash': case 'sh': case 'shell': return 'sh';
+    case 'rust': case 'rs': return 'rs';
+    case 'go': return 'go';
+    case 'cpp': case 'c++': return 'cpp';
+    case 'c': return 'c';
+    case 'java': return 'java';
+    case 'kotlin': case 'kt': return 'kt';
+    default: return 'txt';
+  }
+}
+
+Future<void> _saveCodeBlock(BuildContext context, String code, String language) async {
+  try {
+    final ext = getExtension(language);
+    final dir = Directory('/data/data/com.termux/files/home/downloads');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    final filename = 'code_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final file = File('${dir.path}/$filename');
+    await file.writeAsString(code);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('File saved: downloads/$filename'),
+        backgroundColor: const Color(0xFF36764D),
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to save file: $e'),
+        backgroundColor: const Color(0xFF9B4D39),
+      ),
+    );
+  }
+}
+
+class ContentBlock {
+  final bool isCode;
+  final String content;
+  final String language;
+
+  ContentBlock({required this.isCode, required this.content, this.language = ''});
+}
+
+List<ContentBlock> parseContentBlocks(String text) {
+  final blocks = <ContentBlock>[];
+  final parts = text.split('```');
+  
+  for (var i = 0; i < parts.length; i++) {
+    final part = parts[i];
+    if (i % 2 == 0) {
+      if (part.isNotEmpty) {
+        blocks.add(ContentBlock(isCode: false, content: part));
+      }
+    } else {
+      final lines = part.split('\n');
+      final language = lines.first.trim();
+      final codeContent = lines.skip(1).join('\n');
+      blocks.add(ContentBlock(isCode: true, content: codeContent, language: language));
+    }
+  }
+  return blocks;
+}
+
+String convertLatexToUnicode(String text) {
+  var formatted = text;
+
+  final replacements = {
+    r'\alpha': 'α',
+    r'\beta': 'β',
+    r'\gamma': 'γ',
+    r'\delta': 'δ',
+    r'\epsilon': 'ε',
+    r'\zeta': 'ζ',
+    r'\eta': 'η',
+    r'\theta': 'θ',
+    r'\iota': 'ι',
+    r'\kappa': 'κ',
+    r'\lambda': 'λ',
+    r'\mu': 'μ',
+    r'\nu': 'ν',
+    r'\xi': 'ξ',
+    r'\pi': 'π',
+    r'\rho': 'ρ',
+    r'\sigma': 'σ',
+    r'\tau': 'τ',
+    r'\upsilon': 'υ',
+    r'\phi': 'φ',
+    r'\chi': 'χ',
+    r'\psi': 'ψ',
+    r'\omega': 'ω',
+    r'\Gamma': 'Γ',
+    r'\Delta': 'Δ',
+    r'\Theta': 'Θ',
+    r'\Lambda': 'Λ',
+    r'\Xi': 'Ξ',
+    r'\Pi': 'Π',
+    r'\Sigma': 'Σ',
+    r'\Phi': 'Φ',
+    r'\Psi': 'Ψ',
+    r'\Omega': 'Ω',
+    r'\pm': '±',
+    r'\times': '×',
+    r'\div': '÷',
+    r'\cdot': '·',
+    r'\le': '≤',
+    r'\ge': '≥',
+    r'\ne': '≠',
+    r'\approx': '≈',
+    r'\in': '∈',
+    r'\notin': '∉',
+    r'\ni': '∋',
+    r'\propto': '∝',
+    r'\infty': '∞',
+    r'\partial': '∂',
+    r'\nabla': '∇',
+    r'\sum': '∑',
+    r'\prod': '∏',
+    r'\coprod': '∐',
+    r'\int': '∫',
+    r'\iint': '∬',
+    r'\iiint': '∌',
+    r'\oint': '∮',
+    r'\therefore': '∴',
+    r'\because': '∌',
+    r'\forall': '∀',
+    r'\exists': '∃',
+    r'\empty': '∅',
+    r'\emptyset': '∅',
+    r'\cap': '∩',
+    r'\cup': '∪',
+    r'\subset': '⊂',
+    r'\supset': '⊃',
+    r'\subseteq': '⊆',
+    r'\supseteq': '⊇',
+    r'\leftrightarrow': '↔',
+    r'\Leftarrow': '⇐',
+    r'\Rightarrow': '⇒',
+    r'\Leftrightarrow': '⇔',
+    r'\to': '→',
+    r'\rightarrow': '→',
+    r'\gets': '←',
+    r'\leftarrow': '←',
+    r'\uparrow': '↑',
+    r'\downarrow': '↓',
+    r'\neq': '≠',
+    r'\leq': '≤',
+    r'\geq': '≥',
+  };
+
+  final sqrtRegex = RegExp(r'\\sqrt\s*\{\s*(.*?)\s*\}', dotAll: true);
+  formatted = formatted.replaceAllMapped(sqrtRegex, (match) {
+    final inside = match.group(1) ?? '';
+    return '√($inside)';
+  });
+
+  final fracRegex = RegExp(r'\\frac\s*\{\s*(.*?)\s*\}\s*\{\s*(.*?)\s*\}', dotAll: true);
+  formatted = formatted.replaceAllMapped(fracRegex, (match) {
+    final num = match.group(1) ?? '';
+    final den = match.group(2) ?? '';
+    return '($num)/($den)';
+  });
+
+  formatted = formatted.replaceAll(r'\left(', '(');
+  formatted = formatted.replaceAll(r'\right)', ')');
+  formatted = formatted.replaceAll(r'\left[', '[');
+  formatted = formatted.replaceAll(r'\right]', ']');
+  formatted = formatted.replaceAll(r'\left\{', '{');
+  formatted = formatted.replaceAll(r'\right\}', '}');
+  formatted = formatted.replaceAll(r'\langle', '⟨');
+  formatted = formatted.replaceAll(r'\rangle', '⟩');
+
+  replacements.forEach((key, val) {
+    formatted = formatted.replaceAll(key, val);
+  });
+
+  final superscriptMap = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
+    'n': 'ⁿ', 'i': 'ⁱ', 'x': 'ˣ', 'y': 'ʸ'
+  };
+  final superRegex = RegExp(r'\^([0-9a-nixy\+\-\=\(\)])');
+  formatted = formatted.replaceAllMapped(superRegex, (match) {
+    final char = match.group(1) ?? '';
+    return superscriptMap[char] ?? '^$char';
+  });
+
+  final subscriptMap = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+    '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
+    'x': 'ₓ', 'y': 'y', 'i': 'ᵢ', 'j': 'ⱼ'
+  };
+  final subRegex = RegExp(r'_([0-9\+\-\=\(\)xyij])');
+  formatted = formatted.replaceAllMapped(subRegex, (match) {
+    final char = match.group(1) ?? '';
+    return subscriptMap[char] ?? '_$char';
+  });
+
+  formatted = formatted.replaceAllMapped(RegExp(r'\\text\s*\{\s*(.*?)\s*\}'), (m) => m.group(1) ?? '');
+
+  return formatted;
+}
+
 class MessageBubble extends StatelessWidget {
   const MessageBubble({
     required this.message,
     required this.index,
+    required this.providerShortName,
+    required this.providerName,
+    required this.reasoningEnabled,
+    required this.onEditUserMessage,
     super.key,
   });
 
   final ChatMessage message;
   final int index;
+  final String providerShortName;
+  final String providerName;
+  final bool reasoningEnabled;
+  final VoidCallback onEditUserMessage;
 
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
-    final align = isUser ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor = message.isError
-        ? const Color(0xFFFFE7DD)
-        : isUser
-            ? const Color(0xFF382E25)
-            : const Color(0xFFFFFCF6);
-    final textColor = isUser ? Colors.white : const Color(0xFF2D241C);
 
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 240 + (index % 5) * 24),
@@ -896,93 +1524,227 @@ class MessageBubble extends StatelessWidget {
           ),
         );
       },
-      child: Align(
-        alignment: align,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 7),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-            decoration: BoxDecoration(
-              color: bubbleColor,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(18),
-                topRight: const Radius.circular(18),
-                bottomLeft: Radius.circular(isUser ? 18 : 6),
-                bottomRight: Radius.circular(isUser ? 6 : 18),
-              ),
-              border: Border.all(
-                color: isUser ? const Color(0xFF382E25) : const Color(0xFFE7D8C4),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: isUser
-                ? SelectableText(
-                    message.text,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (isUser) ...[
+                  const Icon(Icons.person_outline, size: 16, color: Color(0xFF7B4E2E)),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'You',
                     style: TextStyle(
-                      height: 1.45,
-                      color: textColor,
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  )
-                : MarkdownBody(
-                    data: formatMathText(message.text),
-                    selectable: true,
-                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                      p: TextStyle(
-                        height: 1.45,
-                        color: textColor,
-                        fontSize: 15.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      code: GoogleFonts.manrope(
-                        fontSize: 13,
-                        color: const Color(0xFF7B4E2E),
-                        backgroundColor: const Color(0xFFF7F2E8),
-                      ),
-                      codeblockDecoration: BoxDecoration(
-                        color: const Color(0xFFF7F2E8),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFDCCBB8)),
-                      ),
-                      tableBorder: TableBorder.all(
-                        color: const Color(0xFFDCCBB8),
-                        width: 1,
-                      ),
-                      tableBody: TextStyle(
-                        color: textColor,
-                        fontSize: 14,
-                      ),
-                      tableHead: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                      h1: TextStyle(
-                        color: textColor,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      h2: TextStyle(
-                        color: textColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      h3: TextStyle(
-                        color: textColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Color(0xFF7B4E2E),
                     ),
                   ),
-          ),
+                ] else ...[
+                  ProviderAvatar(label: providerShortName, small: true),
+                  const SizedBox(width: 8),
+                  Text(
+                    providerName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Color(0xFF2D241C),
+                    ),
+                  ),
+                ],
+                const Spacer(),
+                IconButton(
+                  tooltip: 'Copy text',
+                  icon: const Icon(Icons.content_copy_rounded, size: 14, color: Color(0xFF6C5946)),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: message.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Message copied to clipboard')),
+                    );
+                  },
+                ),
+                if (isUser)
+                  IconButton(
+                    tooltip: 'Edit message',
+                    icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFF6C5946)),
+                    onPressed: onEditUserMessage,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (message.images.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: message.images.map((img) {
+                    return Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFDCCBB8)),
+                        image: DecorationImage(
+                          image: MemoryImage(base64Decode(img)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            if (message.role == MessageRole.system)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7F4EF),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE7D8C4)),
+                ),
+                child: ExpansionTile(
+                  title: Text(
+                    message.text.split('\n').first,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF7B4E2E),
+                    ),
+                  ),
+                  leading: const Icon(Icons.table_rows_outlined, color: Color(0xFF7B4E2E), size: 18),
+                  collapsedBackgroundColor: Colors.transparent,
+                  backgroundColor: Colors.transparent,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: MarkdownBody(
+                          data: message.text,
+                          selectable: true,
+                          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (isUser)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFDF9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE7D8C4)),
+                ),
+                child: SelectableText(
+                  message.text,
+                  style: const TextStyle(
+                    height: 1.45,
+                    color: Color(0xFF2D241C),
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              )
+            else ...[
+              if (message.reasoning.isNotEmpty && reasoningEnabled)
+                ThoughtBlock(thought: message.reasoning),
+              if (message.text.startsWith('[SEARCH_REQUEST:'))
+                Builder(builder: (context) {
+                  final query = message.text
+                      .replaceFirst('[SEARCH_REQUEST:', '')
+                      .replaceFirst(']', '')
+                      .trim();
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F5FA),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFD0E0F0)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search, color: Color(0xFF2B6CB0), size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Tool Use: Searched the web for "$query"',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2B6CB0),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                })
+              else
+                ...parseContentBlocks(message.text).map((block) {
+                  if (block.isCode) {
+                    if (block.language.toLowerCase() == 'math') {
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.all(12),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFCF6),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFE7D8C4)),
+                        ),
+                        child: SelectableText(
+                          convertLatexToUnicode(block.content),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2D241C),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      );
+                    }
+                    return CodeBlockWidget(
+                      code: block.content,
+                      language: block.language,
+                      onSave: () => _saveCodeBlock(context, block.content, block.language),
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: MarkdownBody(
+                        data: formatMathText(convertLatexToUnicode(block.content)),
+                        selectable: true,
+                        styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                          p: const TextStyle(
+                            height: 1.48,
+                            color: Color(0xFF1E1E1E),
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          h1: const TextStyle(color: Color(0xFF2D241C), fontSize: 20, fontWeight: FontWeight.bold),
+                          h2: const TextStyle(color: Color(0xFF2D241C), fontSize: 18, fontWeight: FontWeight.bold),
+                          h3: const TextStyle(color: Color(0xFF2D241C), fontSize: 16, fontWeight: FontWeight.bold),
+                          listBullet: const TextStyle(color: Color(0xFF7B4E2E), fontSize: 15.5),
+                          tableBorder: TableBorder.all(color: const Color(0xFFDCCBB8), width: 1),
+                          tableBody: const TextStyle(color: Color(0xFF1E1E1E), fontSize: 14),
+                          tableHead: const TextStyle(color: Color(0xFF2D241C), fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                    );
+                  }
+                }),
+            ],
+            const SizedBox(height: 4),
+            const Divider(color: Color(0xFFE7D8C4), height: 1),
+          ],
         ),
       ),
     );
@@ -997,7 +1759,7 @@ class TypingBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 7),
+        margin: const EdgeInsets.symmetric(vertical: 7, horizontal: 14),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFCF6),
@@ -1071,6 +1833,8 @@ class Composer extends StatelessWidget {
     required this.isSending,
     required this.onSend,
     required this.onPlusPressed,
+    required this.attachedImages,
+    required this.onRemoveImage,
     super.key,
   });
 
@@ -1078,94 +1842,149 @@ class Composer extends StatelessWidget {
   final bool isSending;
   final VoidCallback onSend;
   final VoidCallback onPlusPressed;
+  final List<String> attachedImages;
+  final ValueChanged<int> onRemoveImage;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 920),
-        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFCF6),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFFDCCBB8)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                minLines: 1,
-                maxLines: 6,
-                textInputAction: TextInputAction.newline,
-                decoration: const InputDecoration(
-                  hintText: 'Message any provider...',
-                  border: InputBorder.none,
-                  isDense: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (attachedImages.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: SizedBox(
+                height: 60,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: attachedImages.length,
+                  itemBuilder: (context, idx) {
+                    return Stack(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFDCCBB8)),
+                            image: DecorationImage(
+                              image: MemoryImage(base64Decode(attachedImages[idx])),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: GestureDetector(
+                            onTap: () => onRemoveImage(idx),
+                            child: const CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.black54,
+                              child: Icon(Icons.close, size: 10, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onPlusPressed,
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFFFF8EA),
-                  border: Border.all(color: const Color(0xFFD8B98D), width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF7B4E2E).withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 920),
+            padding: const EdgeInsets.fromLTRB(10, 10, 8, 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFFCF6),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: const Color(0xFFDCCBB8)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: onPlusPressed,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 2, right: 8),
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFFFF8EA),
+                      border: Border.all(color: const Color(0xFFD8B98D), width: 1.5),
                     ),
-                  ],
+                    child: const Icon(
+                      Icons.add,
+                      color: Color(0xFF7B4E2E),
+                      size: 20,
+                    ),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.add,
-                  color: Color(0xFF7B4E2E),
-                  size: 20,
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    minLines: 1,
+                    maxLines: 6,
+                    textInputAction: TextInputAction.newline,
+                    decoration: const InputDecoration(
+                      hintText: 'Message any provider...',
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutCubic,
+                  decoration: BoxDecoration(
+                    color: isSending
+                        ? const Color(0xFFCBBBA4)
+                        : const Color(0xFF2E241C),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: IconButton(
+                    tooltip: 'Send',
+                    onPressed: isSending ? null : onSend,
+                    icon: isSending
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.arrow_upward, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              decoration: BoxDecoration(
-                color: isSending
-                    ? const Color(0xFFCBBBA4)
-                    : const Color(0xFF2E241C),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: IconButton(
-                tooltip: 'Send',
-                onPressed: isSending ? null : onSend,
-                icon: isSending
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.arrow_upward, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
+
+bool modelHasVision(String modelName) {
+  final lower = modelName.toLowerCase();
+  return lower.contains('vision') ||
+      lower.contains('gpt-4o') ||
+      lower.contains('claude-3') ||
+      lower.contains('gemini-1.5') ||
+      lower.contains('gemini-2.0') ||
+      lower.contains('gemini-2.5') ||
+      lower.contains('pixtral') ||
+      lower.contains('llama-3.2-11b') ||
+      lower.contains('llama-3.2-90b');
 }
 
 class MediaAndModelSheet extends StatefulWidget {
@@ -1173,9 +1992,13 @@ class MediaAndModelSheet extends StatefulWidget {
     required this.provider,
     required this.settings,
     required this.cachedModels,
+    required this.searchSettings,
+    required this.onSearchSettingsChanged,
+    required this.onImageAttached,
     required this.onProviderChanged,
     required this.onModelChanged,
     required this.onMaxTokensChanged,
+    required this.onReasoningEnabledChanged,
     required this.onFetchModels,
     required this.onConfigureKey,
     super.key,
@@ -1184,9 +2007,13 @@ class MediaAndModelSheet extends StatefulWidget {
   final ProviderDefinition provider;
   final ProviderSettings settings;
   final List<String> cachedModels;
+  final SearchSettings searchSettings;
+  final ValueChanged<SearchSettings> onSearchSettingsChanged;
+  final ValueChanged<String> onImageAttached;
   final ValueChanged<String> onProviderChanged;
   final ValueChanged<String> onModelChanged;
   final ValueChanged<int> onMaxTokensChanged;
+  final ValueChanged<bool> onReasoningEnabledChanged;
   final Future<List<String>> Function() onFetchModels;
   final VoidCallback onConfigureKey;
 
@@ -1199,6 +2026,11 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
   var _fetching = false;
   late String _selectedProviderId;
   late String _selectedModel;
+  late bool _reasoningEnabled;
+  late bool _searchEnabled;
+  late String _searchProvider;
+  late final TextEditingController _searchKeyController;
+  late final TextEditingController _searchCxController;
 
   @override
   void initState() {
@@ -1206,6 +2038,18 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
     _maxTokens = widget.settings.maxTokens;
     _selectedProviderId = widget.provider.id;
     _selectedModel = widget.settings.model;
+    _reasoningEnabled = widget.settings.reasoningEnabled;
+    _searchEnabled = widget.searchSettings.enabled;
+    _searchProvider = widget.searchSettings.provider;
+    _searchKeyController = TextEditingController(text: widget.searchSettings.apiKey);
+    _searchCxController = TextEditingController(text: widget.searchSettings.googleCx);
+  }
+
+  @override
+  void dispose() {
+    _searchKeyController.dispose();
+    _searchCxController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetch() async {
@@ -1230,10 +2074,48 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final bytes = await file.readAsBytes();
+        final base64String = base64Encode(bytes);
+        widget.onImageAttached(base64String);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image attached successfully')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick image: $e')),
+        );
+      }
+    }
+  }
+
+  void _updateSearchSettings() {
+    widget.onSearchSettingsChanged(
+      SearchSettings(
+        enabled: _searchEnabled,
+        provider: _searchProvider,
+        apiKey: _searchKeyController.text.trim(),
+        googleCx: _searchCxController.text.trim(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentProvider = providerCatalog.firstWhere((p) => p.id == _selectedProviderId);
     final models = widget.cachedModels.isNotEmpty ? widget.cachedModels : currentProvider.models;
+    final visionEnabled = modelHasVision(_selectedModel);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
@@ -1248,263 +2130,435 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 42,
-              height: 5,
-              decoration: BoxDecoration(
-                color: const Color(0xFFDCCBB8),
-                borderRadius: BorderRadius.circular(3),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCCBB8),
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Input & Settings',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF2D241C),
+            const SizedBox(height: 20),
+            const Text(
+              'Input & Settings',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF2D241C),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Media Attachment (Soon)',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF6C5946),
+            const SizedBox(height: 16),
+            const Text(
+              'Media Attachment',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6C5946),
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildMediaItem(Icons.image_outlined, 'Photos'),
-              _buildMediaItem(Icons.camera_alt_outlined, 'Camera'),
-              _buildMediaItem(Icons.insert_drive_file_outlined, 'Document'),
-              _buildMediaItem(Icons.mic_none_outlined, 'Audio'),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Divider(color: Color(0xFFE7D8C4)),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: _selectedProviderId,
-                  dropdownColor: const Color(0xFFFFFBF2),
-                  decoration: const InputDecoration(
-                    labelText: 'AI Provider',
-                    labelStyle: TextStyle(color: Color(0xFF6C5946)),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFDCCBB8)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFDCCBB8)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF7B4E2E)),
-                    ),
-                    prefixIcon: Icon(Icons.hub_outlined, color: Color(0xFF7B4E2E)),
-                  ),
-                  items: providerCatalog.map((p) {
-                    return DropdownMenuItem<String>(
-                      value: p.id,
-                      child: Text(p.name),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      final nextProvider = providerCatalog.firstWhere((p) => p.id == val);
-                      setState(() {
-                        _selectedProviderId = val;
-                        _selectedModel = nextProvider.models.first;
-                      });
-                      widget.onProviderChanged(val);
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildMediaItem(
+                  Icons.image_outlined,
+                  'Photos',
+                  isEnabled: visionEnabled,
+                  onTap: () {
+                    if (visionEnabled) {
+                      _pickImage();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Selected model does not support vision (image input).')),
+                      );
                     }
                   },
                 ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 56,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFDCCBB8)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    widget.onConfigureKey();
-                  },
-                  child: const Icon(Icons.key, color: Color(0xFF7B4E2E)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: models.contains(_selectedModel) ? _selectedModel : models.first,
-                  dropdownColor: const Color(0xFFFFFBF2),
-                  decoration: const InputDecoration(
-                    labelText: 'Model Name',
-                    labelStyle: TextStyle(color: Color(0xFF6C5946)),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFDCCBB8)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFDCCBB8)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF7B4E2E)),
-                    ),
-                    prefixIcon: Icon(Icons.memory_outlined, color: Color(0xFF7B4E2E)),
-                  ),
-                  items: models.map((m) {
-                    return DropdownMenuItem<String>(
-                      value: m,
-                      child: Text(
-                        m,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() => _selectedModel = val);
-                      widget.onModelChanged(val);
+                _buildMediaItem(
+                  Icons.camera_alt_outlined,
+                  'Camera',
+                  isEnabled: visionEnabled,
+                  onTap: () {
+                    if (visionEnabled) {
+                      _pickImage();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Selected model does not support vision (image input).')),
+                      );
                     }
                   },
                 ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 56,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFDCCBB8)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: _fetching ? null : _fetch,
-                  child: _fetching
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.sync, color: Color(0xFF7B4E2E)),
+                _buildMediaItem(
+                  Icons.insert_drive_file_outlined,
+                  'Document',
+                  isEnabled: false,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Document attachment is not supported yet.')),
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Max Output Tokens',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D241C),
-                    ),
-                  ),
-                  Text(
-                    '$_maxTokens tokens',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF7B4E2E),
-                    ),
-                  ),
-                ],
-              ),
-              Slider(
-                value: _maxTokens.toDouble().clamp(128, 16384),
-                min: 128,
-                max: 16384,
-                divisions: 63,
-                activeColor: const Color(0xFF7B4E2E),
-                inactiveColor: const Color(0xFFE7D8C4),
-                onChanged: (val) {
-                  setState(() => _maxTokens = val.round());
-                  widget.onMaxTokensChanged(val.round());
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [512, 1024, 2048, 4096, 8192].map((preset) {
-                  final selected = _maxTokens == preset;
-                  return ChoiceChip(
-                    label: Text(
-                      preset.toString(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: selected ? Colors.white : const Color(0xFF2D241C),
+                _buildMediaItem(
+                  Icons.mic_none_outlined,
+                  'Audio',
+                  isEnabled: false,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Audio input is not supported yet.')),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Divider(color: Color(0xFFE7D8C4)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedProviderId,
+                    dropdownColor: const Color(0xFFFFFBF2),
+                    decoration: const InputDecoration(
+                      labelText: 'AI Provider',
+                      labelStyle: TextStyle(color: Color(0xFF6C5946)),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFDCCBB8)),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFDCCBB8)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF7B4E2E)),
+                      ),
+                      prefixIcon: Icon(Icons.hub_outlined, color: Color(0xFF7B4E2E)),
                     ),
-                    selected: selected,
-                    selectedColor: const Color(0xFF7B4E2E),
-                    backgroundColor: const Color(0xFFFFFCF6),
-                    onSelected: (sel) {
-                      if (sel) {
-                        setState(() => _maxTokens = preset);
-                        widget.onMaxTokensChanged(preset);
+                    items: providerCatalog.map((p) {
+                      return DropdownMenuItem<String>(
+                        value: p.id,
+                        child: Text(p.name),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        final nextProvider = providerCatalog.firstWhere((p) => p.id == val);
+                        setState(() {
+                          _selectedProviderId = val;
+                          _selectedModel = nextProvider.models.first;
+                        });
+                        widget.onProviderChanged(val);
                       }
                     },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  height: 56,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFDCCBB8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      widget.onConfigureKey();
+                    },
+                    child: const Icon(Icons.key, color: Color(0xFF7B4E2E)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: models.contains(_selectedModel) ? _selectedModel : models.first,
+                    dropdownColor: const Color(0xFFFFFBF2),
+                    decoration: const InputDecoration(
+                      labelText: 'Model Name',
+                      labelStyle: TextStyle(color: Color(0xFF6C5946)),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFDCCBB8)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFDCCBB8)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF7B4E2E)),
+                      ),
+                      prefixIcon: Icon(Icons.memory_outlined, color: Color(0xFF7B4E2E)),
+                    ),
+                    items: models.map((m) {
+                      return DropdownMenuItem<String>(
+                        value: m,
+                        child: Text(
+                          m,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _selectedModel = val);
+                        widget.onModelChanged(val);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  height: 56,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFDCCBB8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: _fetching ? null : _fetch,
+                    child: _fetching
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.sync, color: Color(0xFF7B4E2E)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Max Output Tokens',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2D241C),
+                      ),
+                    ),
+                    Text(
+                      '$_maxTokens tokens',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF7B4E2E),
+                      ),
+                    ),
+                  ],
+                ),
+                Slider(
+                  value: _maxTokens.toDouble().clamp(128, 16384),
+                  min: 128,
+                  max: 16384,
+                  divisions: 63,
+                  activeColor: const Color(0xFF7B4E2E),
+                  inactiveColor: const Color(0xFFE7D8C4),
+                  onChanged: (val) {
+                    setState(() => _maxTokens = val.round());
+                    widget.onMaxTokensChanged(val.round());
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [512, 1024, 2048, 4096, 8192].map((preset) {
+                    final selected = _maxTokens == preset;
+                    return ChoiceChip(
+                      label: Text(
+                        preset.toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: selected ? Colors.white : const Color(0xFF2D241C),
+                        ),
+                      ),
+                      selected: selected,
+                      selectedColor: const Color(0xFF7B4E2E),
+                      backgroundColor: const Color(0xFFFFFCF6),
+                      onSelected: (sel) {
+                        if (sel) {
+                          setState(() => _maxTokens = preset);
+                          widget.onMaxTokensChanged(preset);
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(color: Color(0xFFE7D8C4)),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CoT Thinking / Reasoning',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2D241C),
+                      ),
+                    ),
+                    Text(
+                      'Allow models to think step-by-step',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF6C5946),
+                      ),
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: _reasoningEnabled,
+                  activeColor: const Color(0xFF7B4E2E),
+                  onChanged: (val) {
+                    setState(() => _reasoningEnabled = val);
+                    widget.onReasoningEnabledChanged(val);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(color: Color(0xFFE7D8C4)),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Agentic Web Search',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2D241C),
+                      ),
+                    ),
+                    Text(
+                      'Let models search the web if needed',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF6C5946),
+                      ),
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: _searchEnabled,
+                  activeColor: const Color(0xFF7B4E2E),
+                  onChanged: (val) {
+                    setState(() => _searchEnabled = val);
+                    _updateSearchSettings();
+                  },
+                ),
+              ],
+            ),
+            if (_searchEnabled) ...[
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _searchProvider,
+                dropdownColor: const Color(0xFFFFFBF2),
+                decoration: const InputDecoration(
+                  labelText: 'Search API Provider',
+                  labelStyle: TextStyle(color: Color(0xFF6C5946)),
+                  border: OutlineInputBorder(),
+                ),
+                items: ['tavily', 'exa', 'firecrawl', 'google'].map((p) {
+                  return DropdownMenuItem<String>(
+                    value: p,
+                    child: Text(p.toUpperCase()),
                   );
                 }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _searchProvider = val);
+                    _updateSearchSettings();
+                  }
+                },
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _searchKeyController,
+                decoration: const InputDecoration(
+                  labelText: 'Search API Key',
+                  labelStyle: TextStyle(color: Color(0xFF6C5946)),
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                onChanged: (_) => _updateSearchSettings(),
+              ),
+              if (_searchProvider == 'google') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _searchCxController,
+                  decoration: const InputDecoration(
+                    labelText: 'Google Search Engine ID (CX)',
+                    labelStyle: TextStyle(color: Color(0xFF6C5946)),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (_) => _updateSearchSettings(),
+                ),
+              ],
             ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMediaItem(IconData icon, String label) {
+  Widget _buildMediaItem(IconData icon, String label, {required bool isEnabled, required VoidCallback onTap}) {
     return Opacity(
-      opacity: 0.4,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFE7D8C4),
-              border: Border.all(color: const Color(0xFFDCCBB8)),
-            ),
-            child: Icon(icon, color: const Color(0xFF6C5946)),
+      opacity: isEnabled ? 1.0 : 0.3,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isEnabled ? const Color(0xFFE7D8C4) : const Color(0xFFF2ECE1),
+                  border: Border.all(color: const Color(0xFFDCCBB8)),
+                ),
+                child: Icon(icon, color: isEnabled ? const Color(0xFF7B4E2E) : const Color(0xFF9E8E7D)),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: isEnabled ? const Color(0xFF2D241C) : const Color(0xFF9E8E7D),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF6C5946),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -2032,10 +3086,26 @@ class ChatClient {
       final payload = <String, dynamic>{
         'model': model,
         'messages': messages
-            .map((message) => {
+            .map((message) {
+              if (message.images.isNotEmpty) {
+                return {
                   'role': message.role.apiName,
-                  'content': message.text,
-                })
+                  'content': [
+                    {'type': 'text', 'text': message.text},
+                    ...message.images.map((img) => {
+                          'type': 'image_url',
+                          'image_url': {
+                            'url': 'data:image/jpeg;base64,$img'
+                          }
+                        })
+                  ]
+                };
+              }
+              return {
+                'role': message.role.apiName,
+                'content': message.text,
+              };
+            })
             .toList(),
         'max_tokens': settings.maxTokens,
         'temperature': 1.0,
@@ -2071,10 +3141,26 @@ class ChatClient {
       final payload = <String, dynamic>{
         'model': model,
         'messages': messages
-            .map((message) => {
+            .map((message) {
+              if (message.images.isNotEmpty) {
+                return {
                   'role': message.role.apiName,
-                  'content': message.text,
-                })
+                  'content': [
+                    {'type': 'text', 'text': message.text},
+                    ...message.images.map((img) => {
+                          'type': 'image_url',
+                          'image_url': {
+                            'url': 'data:image/jpeg;base64,$img'
+                          }
+                        })
+                  ]
+                };
+              }
+              return {
+                'role': message.role.apiName,
+                'content': message.text,
+              };
+            })
             .toList(),
         'max_tokens': settings.maxTokens,
         'temperature': 1.0,
@@ -2108,10 +3194,14 @@ class ChatClient {
                 final first = choices.first;
                 if (first is Map) {
                   final delta = first['delta'];
-                  if (delta is Map && delta['content'] != null) {
-                    yield delta['content'].toString();
-                  } else if (first['text'] != null) {
-                    yield first['text'].toString();
+                  if (delta is Map) {
+                    if (delta['reasoning_content'] != null) {
+                      yield '[REASONING]${delta['reasoning_content']}';
+                    } else if (delta['content'] != null) {
+                      yield delta['content'].toString();
+                    } else if (first['text'] != null) {
+                      yield first['text'].toString();
+                    }
                   }
                 }
               }
@@ -2121,6 +3211,77 @@ class ChatClient {
           }
         }
       }
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<String> searchWeb(String query, String provider, String apiKey, {String? googleCx}) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+    try {
+      if (provider == 'tavily') {
+        final uri = Uri.parse('https://api.tavily.com/search');
+        final request = await client.postUrl(uri);
+        request.headers.contentType = ContentType.json;
+        request.write(jsonEncode({
+          'api_key': apiKey,
+          'query': query,
+          'max_results': 4,
+        }));
+        final response = await request.close();
+        final body = await response.transform(utf8.decoder).join();
+        final decoded = jsonDecode(body);
+        if (decoded is Map && decoded['results'] is List) {
+          final results = decoded['results'] as List;
+          return results.map((r) => '- [${r['title']}](${r['url']}): ${r['content']}').join('\n\n');
+        }
+      } else if (provider == 'exa') {
+        final uri = Uri.parse('https://api.exa.ai/search');
+        final request = await client.postUrl(uri);
+        request.headers.set('x-api-key', apiKey);
+        request.headers.contentType = ContentType.json;
+        request.write(jsonEncode({
+          'query': query,
+          'numResults': 4,
+          'text': true,
+        }));
+        final response = await request.close();
+        final body = await response.transform(utf8.decoder).join();
+        final decoded = jsonDecode(body);
+        if (decoded is Map && decoded['results'] is List) {
+          final results = decoded['results'] as List;
+          return results.map((r) => '- [${r['title']}](${r['url']}): ${r['text'] ?? r['highlights']?.first ?? ''}').join('\n\n');
+        }
+      } else if (provider == 'firecrawl') {
+        final uri = Uri.parse('https://api.firecrawl.dev/v1/search');
+        final request = await client.postUrl(uri);
+        request.headers.set('Authorization', 'Bearer $apiKey');
+        request.headers.contentType = ContentType.json;
+        request.write(jsonEncode({
+          'query': query,
+          'limit': 4,
+        }));
+        final response = await request.close();
+        final body = await response.transform(utf8.decoder).join();
+        final decoded = jsonDecode(body);
+        if (decoded is Map && decoded['data'] is List) {
+          final results = decoded['data'] as List;
+          return results.map((r) => '- [${r['title'] ?? r['metadata']?['title']}](${r['url'] ?? r['metadata']?['source']}): ${r['markdown'] ?? r['snippet'] ?? ''}').join('\n\n');
+        }
+      } else if (provider == 'google') {
+        final uri = Uri.parse('https://www.googleapis.com/customsearch/v1?key=$apiKey&cx=${googleCx ?? ''}&q=${Uri.encodeComponent(query)}');
+        final request = await client.getUrl(uri);
+        final response = await request.close();
+        final body = await response.transform(utf8.decoder).join();
+        final decoded = jsonDecode(body);
+        if (decoded is Map && decoded['items'] is List) {
+          final results = decoded['items'] as List;
+          return results.map((r) => '- [${r['title']}](${r['link']}): ${r['snippet']}').join('\n\n');
+        }
+      }
+      return 'No search results found.';
+    } catch (e) {
+      return 'Web search failed: $e';
     } finally {
       client.close(force: true);
     }
@@ -2200,6 +3361,7 @@ class ProviderSettings {
     required this.baseUrl,
     required this.model,
     required this.maxTokens,
+    this.reasoningEnabled = true,
   });
 
   factory ProviderSettings.defaults(ProviderDefinition provider) {
@@ -2208,6 +3370,7 @@ class ProviderSettings {
       baseUrl: provider.baseUrl,
       model: provider.models.first,
       maxTokens: provider.defaultMaxTokens,
+      reasoningEnabled: true,
     );
   }
 
@@ -2217,6 +3380,7 @@ class ProviderSettings {
       baseUrl: json['baseUrl']?.toString() ?? '',
       model: json['model']?.toString() ?? '',
       maxTokens: _readInt(json['maxTokens'], 0),
+      reasoningEnabled: json['reasoningEnabled'] as bool? ?? true,
     );
   }
 
@@ -2224,18 +3388,21 @@ class ProviderSettings {
   final String baseUrl;
   final String model;
   final int maxTokens;
+  final bool reasoningEnabled;
 
   ProviderSettings copyWith({
     String? apiKey,
     String? baseUrl,
     String? model,
     int? maxTokens,
+    bool? reasoningEnabled,
   }) {
     return ProviderSettings(
       apiKey: apiKey ?? this.apiKey,
       baseUrl: baseUrl ?? this.baseUrl,
       model: model ?? this.model,
       maxTokens: maxTokens ?? this.maxTokens,
+      reasoningEnabled: reasoningEnabled ?? this.reasoningEnabled,
     );
   }
 
@@ -2245,6 +3412,7 @@ class ProviderSettings {
       'baseUrl': baseUrl,
       'model': model,
       'maxTokens': maxTokens,
+      'reasoningEnabled': reasoningEnabled,
     };
   }
 
@@ -2252,6 +3420,59 @@ class ProviderSettings {
     if (value is int) return value;
     if (value is num) return value.round();
     return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+}
+
+class SearchSettings {
+  final bool enabled;
+  final String provider; // 'tavily', 'exa', 'firecrawl', 'google'
+  final String apiKey;
+  final String googleCx; // Google Search Engine ID
+
+  const SearchSettings({
+    required this.enabled,
+    required this.provider,
+    required this.apiKey,
+    required this.googleCx,
+  });
+
+  factory SearchSettings.defaults() {
+    return const SearchSettings(
+      enabled: false,
+      provider: 'tavily',
+      apiKey: '',
+      googleCx: '',
+    );
+  }
+
+  factory SearchSettings.fromJson(Map<String, dynamic> json) {
+    return SearchSettings(
+      enabled: json['enabled'] as bool? ?? false,
+      provider: json['provider']?.toString() ?? 'tavily',
+      apiKey: json['apiKey']?.toString() ?? '',
+      googleCx: json['googleCx']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'enabled': enabled,
+        'provider': provider,
+        'apiKey': apiKey,
+        'googleCx': googleCx,
+      };
+
+  SearchSettings copyWith({
+    bool? enabled,
+    String? provider,
+    String? apiKey,
+    String? googleCx,
+  }) {
+    return SearchSettings(
+      enabled: enabled ?? this.enabled,
+      provider: provider ?? this.provider,
+      apiKey: apiKey ?? this.apiKey,
+      googleCx: googleCx ?? this.googleCx,
+    );
   }
 }
 
@@ -2269,11 +3490,15 @@ class ChatMessage {
     required this.role,
     required this.text,
     this.isError = false,
+    this.reasoning = '',
+    this.images = const [],
   });
 
   final MessageRole role;
   final String text;
   final bool isError;
+  final String reasoning;
+  final List<String> images;
 }
 
 class ChatSession {
@@ -2282,6 +3507,8 @@ class ChatSession {
   final List<ChatMessage> messages;
   final String providerId;
   final String model;
+  final int? maxTokens;
+  final List<String> attachedImagesBase64;
 
   ChatSession({
     required this.id,
@@ -2289,6 +3516,8 @@ class ChatSession {
     required this.messages,
     required this.providerId,
     required this.model,
+    this.maxTokens,
+    this.attachedImagesBase64 = const [],
   });
 
   ChatSession copyWith({
@@ -2297,6 +3526,8 @@ class ChatSession {
     List<ChatMessage>? messages,
     String? providerId,
     String? model,
+    int? maxTokens,
+    List<String>? attachedImagesBase64,
   }) {
     return ChatSession(
       id: id ?? this.id,
@@ -2304,6 +3535,8 @@ class ChatSession {
       messages: messages ?? this.messages,
       providerId: providerId ?? this.providerId,
       model: model ?? this.model,
+      maxTokens: maxTokens ?? this.maxTokens,
+      attachedImagesBase64: attachedImagesBase64 ?? this.attachedImagesBase64,
     );
   }
 
@@ -2314,9 +3547,13 @@ class ChatSession {
           'role': m.role.apiName,
           'text': m.text,
           'isError': m.isError,
+          'reasoning': m.reasoning,
+          'images': m.images,
         }).toList(),
         'providerId': providerId,
         'model': model,
+        'maxTokens': maxTokens,
+        'attachedImagesBase64': attachedImagesBase64,
       };
 
   factory ChatSession.fromJson(Map<String, dynamic> json) {
@@ -2328,6 +3565,8 @@ class ChatSession {
                   ),
                   text: m['text']?.toString() ?? '',
                   isError: m['isError'] as bool? ?? false,
+                  reasoning: m['reasoning']?.toString() ?? '',
+                  images: (m['images'] as List?)?.map((e) => e.toString()).toList() ?? const [],
                 ))
             .toList() ??
         [];
@@ -2337,6 +3576,8 @@ class ChatSession {
       messages: messagesList,
       providerId: json['providerId']?.toString() ?? providerCatalog.first.id,
       model: json['model']?.toString() ?? '',
+      maxTokens: json['maxTokens'] as int?,
+      attachedImagesBase64: (json['attachedImagesBase64'] as List?)?.map((e) => e.toString()).toList() ?? const [],
     );
   }
 }
