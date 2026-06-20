@@ -108,8 +108,8 @@ class WorkflowService {
     String id, {
     StepExecutor? executor,
   }) async {
-    var workflow = await _repo.get(id);
-    if (workflow == null) return null;
+    final initialWorkflow = await _repo.get(id);
+    if (initialWorkflow == null) return null;
 
     final exec = executor ?? stepExecutor;
     if (exec == null) {
@@ -117,10 +117,13 @@ class WorkflowService {
       return null;
     }
 
-    workflow = workflow.copyWith(
+    var workflow = initialWorkflow.copyWith(
       status: 'running',
       startedAt: DateTime.now(),
-      logs: [...workflow.logs, '${DateTime.now()}: Workflow started'],
+      logs: [
+        ...initialWorkflow.logs,
+        '${DateTime.now()}: Workflow started',
+      ],
     );
     await _repo.save(workflow);
 
