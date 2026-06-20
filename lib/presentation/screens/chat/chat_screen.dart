@@ -104,6 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final _scrollController = ScrollController();
 
   // Provider state
+  List<Map<String, dynamic>> _providers = [];
   Map<String, dynamic>? _provider;
   String? _apiKey;
   String? _modelName;
@@ -138,6 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (providers.isEmpty) {
         if (mounted) {
           setState(() {
+            _providers = [];
             _providerLoading = false;
             _providerError = 'No API provider configured';
           });
@@ -145,38 +147,13 @@ class _ChatScreenState extends State<ChatScreen> {
         return;
       }
 
-      final provider = providers.first;
-      final providerId = provider['id'] as String? ?? '';
-      final apiKey = await AppStorage.getApiKey(providerId);
-
-      if (apiKey == null || apiKey.isEmpty) {
-        if (mounted) {
-          setState(() {
-            _providerLoading = false;
-            _providerError = 'No API key found for ${provider['name'] ?? providerId}';
-          });
-        }
-        return;
-      }
-
-      // Determine model name — use 'defaultModel' or 'models' list or provider name
-      String modelName = 'gpt-3.5-turbo';
-      if (provider['defaultModel'] != null) {
-        modelName = provider['defaultModel'] as String;
-      } else if (provider['models'] is List && (provider['models'] as List).isNotEmpty) {
-        modelName = (provider['models'] as List).first.toString();
-      } else if (provider['model'] != null) {
-        modelName = provider['model'] as String;
-      }
-
-      if (mounted) {
-        setState(() {
-          _provider = provider;
-          _apiKey = apiKey;
-          _modelName = modelName;
-          _providerLoading = false;
-        });
-      }
+      final normalized = providers.map(AppStorage.normalizeProvider).toList();
+      final selectedProviderId = await AppStorage.getSelectedProviderId();
+      final provider = normalized.firstWhere(
+        (item) => item['id'] == selectedProviderId,
+        orElse: () => normalized.first,
+      );
+      await _applyProvider(provider, allProviders: normalized);
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -185,6 +162,69 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       }
     }
+  }
+
+  Future<void> _applyProvider(
+    Map<String, dynamic> provider, {
+    List<Map<String, dynamic>>? allProviders,
+  }) async {
+    try {
+      final providerId = provider['id'] as String? ?? '';
+      final apiKey = await AppStorage.getApiKey(providerId);
+      final modelName = AppStorage.providerModelName(provider);
+      final baseUrl = provider['baseUrl'] as String? ?? '';
+
+      if (baseUrl.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _providerLoading = false;
+            _providerError = 'No base URL found for ${provider['name'] ?? providerId}';
+          });
+        }
+        return;
+      }
+
+      if (modelName.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _providerLoading = false;
+            _providerError = 'No model name found for ${provider['name'] ?? providerId}';
+          });
+        }
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _providers = allProviders ?? _providers;
+          _provider = provider;
+          _apiKey = apiKey ?? '';
+          _modelName = modelName;
+          _providerLoading = false;
+          _providerError = null;
+        });
+      }
+      await AppStorage.saveSelectedProviderId(providerId);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _providerLoading = false;
+          _providerError = 'Failed to load provider: $e';
+        });
+      }
+    }
+  }
+
+  Future<void> _onProviderChanged(String providerId) async {
+    final provider = _providers.firstWhere(
+      (item) => item['id'] == providerId,
+      orElse: () => _providers.first,
+    );
+    setState(() {
+      _providerLoading = true;
+      _providerError = null;
+    });
+    await _applyProvider(provider);
   }
 
   Future<void> _loadMode() async {
@@ -232,7 +272,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _isGenerating) return;
-    if (_provider == null || _apiKey == null) return;
+    if (_provider == null || _modelName == null || _modelName!.isEmpty) return;
 
     // Add user message
     final userMsg = _ChatMessage(
@@ -272,8 +312,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _streamCompletion(_ChatMessage assistantMsg) async {
-    final baseUrl = (_provider!['baseUrl'] as String? ?? '').replaceAll(RegExp(r'/+$'), '');
-    final endpoint = '$baseUrl/chat/completions';
+    final endpoint = _chatCompletionsEndpoint(_provider!);
 
     // Build messages array with system prompt
     final apiMessages = <Map<String, String>>[
@@ -291,14 +330,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final uri = Uri.parse(endpoint);
     final request = await _httpClient!.openUrl('POST', uri);
-    request.headers.set('Authorization', 'Bearer $_apiKey');
+    if (_apiKey != null && _apiKey!.trim().isNotEmpty) {
+      request.headers.set('Authorization', 'Bearer ${_apiKey!.trim()}');
+    }
     request.headers.set('Content-Type', 'application/json');
     request.headers.set('Accept', 'text/event-stream');
+    final customHeaders = _provider!['customHeaders'];
+    if (customHeaders is Map) {
+      for (final entry in customHeaders.entries) {
+        request.headers.set(entry.key.toString(), entry.value.toString());
+      }
+    }
     request.add(utf8.encode(body));
 
     final response = await request.close();
 
-    if (response.statusCode != 200) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       final errorBody = await response.transform(utf8.decoder).join();
       String errorMsg;
       try {
@@ -312,46 +359,52 @@ class _ChatScreenState extends State<ChatScreen> {
       throw HttpException('API error ${response.statusCode}: $errorMsg');
     }
 
-    // Parse SSE stream
+    // Parse SSE stream. Chunks can split in the middle of a JSON line.
     final completer = Completer<void>();
     String buffer = '';
+
+    void consumeLine(String line) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty || !trimmed.startsWith('data:')) return;
+
+      final data = trimmed.substring(5).trim();
+      if (data.isEmpty || data == '[DONE]') return;
+
+      try {
+        final json = jsonDecode(data) as Map<String, dynamic>;
+        final choices = json['choices'] as List<dynamic>?;
+        if (choices == null || choices.isEmpty) return;
+
+        final choice = choices[0] as Map<String, dynamic>;
+        final delta = choice['delta'] as Map<String, dynamic>?;
+        final message = choice['message'] as Map<String, dynamic>?;
+        final token = (delta?['content'] ??
+                delta?['reasoning_content'] ??
+                message?['content'] ??
+                choice['text'])
+            ?.toString();
+        if (token == null || token.isEmpty || !mounted) return;
+
+        setState(() {
+          assistantMsg.content += token;
+        });
+        _scrollToBottom();
+      } catch (_) {
+        // Skip malformed JSON chunks.
+      }
+    }
 
     _activeStream = response.transform(utf8.decoder).listen(
       (chunk) {
         buffer += chunk;
         final lines = buffer.split('\n');
-        // Keep the last potentially incomplete line in the buffer
+        // Keep the last potentially incomplete line in the buffer.
         buffer = lines.removeLast();
 
-        for (final line in lines) {
-          final trimmed = line.trim();
-          if (trimmed.isEmpty) continue;
-          if (!trimmed.startsWith('data: ')) continue;
-
-          final data = trimmed.substring(6);
-          if (data == '[DONE]') continue;
-
-          try {
-            final json = jsonDecode(data) as Map<String, dynamic>;
-            final choices = json['choices'] as List<dynamic>?;
-            if (choices != null && choices.isNotEmpty) {
-              final delta = (choices[0] as Map<String, dynamic>)['delta'] as Map<String, dynamic>?;
-              if (delta != null && delta['content'] != null) {
-                final token = delta['content'] as String;
-                if (mounted) {
-                  setState(() {
-                    assistantMsg.content += token;
-                  });
-                  _scrollToBottom();
-                }
-              }
-            }
-          } catch (_) {
-            // Skip malformed JSON chunks
-          }
-        }
+        for (final line in lines) consumeLine(line);
       },
       onDone: () {
+        if (buffer.trim().isNotEmpty) consumeLine(buffer);
         if (mounted) {
           setState(() {
             assistantMsg.isStreaming = false;
@@ -378,6 +431,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     return completer.future;
+  }
+
+  String _chatCompletionsEndpoint(Map<String, dynamic> provider) {
+    final baseUrl = (provider['baseUrl'] as String? ?? '')
+        .trim()
+        .replaceAll(RegExp(r'/+$'), '');
+    if (baseUrl.endsWith('/chat/completions')) return baseUrl;
+    return '$baseUrl/chat/completions';
   }
 
   String _formatError(Object error) {
@@ -567,46 +628,117 @@ class _ChatScreenState extends State<ChatScreen> {
         color: AppColors.backgroundSecondary,
         border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: _kModes.map((mode) {
-            final isSelected = mode == _currentMode;
-            final color = AppColors.modeColor(mode);
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: FilterChip(
-                selected: isSelected,
-                label: Text(
-                  mode[0].toUpperCase() + mode.substring(1),
-                  style: TextStyle(
+      child: Column(
+        children: [
+          if (_provider != null) _buildProviderSelector(context),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: _kModes.map((mode) {
+                final isSelected = mode == _currentMode;
+                final color = AppColors.modeColor(mode);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FilterChip(
+                    selected: isSelected,
+                    label: Text(
+                      mode[0].toUpperCase() + mode.substring(1),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected ? color : AppColors.textSecondary,
+                      ),
+                    ),
+                    avatar: Icon(
+                      _kModeIcons[mode] ?? Icons.circle,
+                      size: 16,
+                      color: isSelected ? color : AppColors.textTertiary,
+                    ),
+                    selectedColor: color.withValues(alpha: 0.15),
+                    backgroundColor: AppColors.backgroundTertiary,
+                    side: BorderSide(
+                      color: isSelected
+                          ? color.withValues(alpha: 0.4)
+                          : AppColors.borderSubtle,
+                      width: isSelected ? 1.2 : 0.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    showCheckmark: false,
+                    onSelected: (_) => _onModeChanged(mode),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProviderSelector(BuildContext context) {
+    final providerId = _provider?['id']?.toString();
+    final providerName = _provider?['name']?.toString() ?? 'Provider';
+    final modelName = _modelName ?? '';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: PopupMenuButton<String>(
+        initialValue: providerId,
+        onSelected: _onProviderChanged,
+        itemBuilder: (_) => _providers.map((provider) {
+          final name = provider['name']?.toString() ?? 'Provider';
+          final model = AppStorage.providerModelName(provider);
+          return PopupMenuItem<String>(
+            value: provider['id']?.toString(),
+            child: ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.cloud_outlined, size: 18),
+              title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Text(
+                model,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          );
+        }).toList(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundTertiary,
+            border: Border.all(color: AppColors.borderSubtle),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.cloud_outlined,
+                size: 18,
+                color: AppColors.accentTeal,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$providerName  /  $modelName',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? color : AppColors.textSecondary,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                avatar: Icon(
-                  _kModeIcons[mode] ?? Icons.circle,
-                  size: 16,
-                  color: isSelected ? color : AppColors.textTertiary,
-                ),
-                selectedColor: color.withValues(alpha: 0.15),
-                backgroundColor: AppColors.backgroundTertiary,
-                side: BorderSide(
-                  color: isSelected ? color.withValues(alpha: 0.4) : AppColors.borderSubtle,
-                  width: isSelected ? 1.2 : 0.5,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                showCheckmark: false,
-                onSelected: (_) => _onModeChanged(mode),
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-            );
-          }).toList(),
+              const Icon(Icons.expand_more_rounded, size: 18),
+            ],
+          ),
         ),
       ),
     );

@@ -127,16 +127,27 @@ class BridgeResponse {
 
   /// Deserializes a [BridgeResponse] from a JSON map.
   factory BridgeResponse.fromJson(Map<String, dynamic> json) {
+    final result = json['result'];
+    final resultMap = result is Map ? Map<String, dynamic>.from(result) : null;
+    final durationMs = json['durationMs'] as int?;
+    final durationSeconds = (resultMap?['duration'] as num?)?.toDouble();
+
     return BridgeResponse(
-      id: json['id'] as String,
-      result: json['result'],
+      id: json['id'].toString(),
+      result: result,
       error: json['error'] != null
           ? BridgeError.fromJson(json['error'] as Map<String, dynamic>)
           : null,
-      exitCode: json['exitCode'] as int?,
-      stdout: (json['stdout'] as String?) ?? '',
-      stderr: (json['stderr'] as String?) ?? '',
-      duration: Duration(milliseconds: (json['durationMs'] as int?) ?? 0),
+      exitCode: (json['exitCode'] as int?) ?? (resultMap?['exitCode'] as int?),
+      stdout: (json['stdout'] as String?) ??
+          (resultMap?['stdout'] as String?) ??
+          '',
+      stderr: (json['stderr'] as String?) ??
+          (resultMap?['stderr'] as String?) ??
+          '',
+      duration: durationMs != null
+          ? Duration(milliseconds: durationMs)
+          : Duration(milliseconds: ((durationSeconds ?? 0) * 1000).round()),
     );
   }
 

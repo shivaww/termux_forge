@@ -4,6 +4,8 @@
 /// command history, connection status indicator, and clear button.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -12,6 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:termux_forge/core/theme/app_colors.dart';
 import 'package:termux_forge/presentation/widgets/forge_app_bar.dart';
 import 'package:termux_forge/presentation/widgets/status_badge.dart';
+import 'package:termux_forge/services/termux_bridge/termux_bridge_service.dart';
 
 /// The terminal screen.
 class TerminalScreen extends StatefulWidget {
@@ -27,8 +30,12 @@ class _TerminalScreenState extends State<TerminalScreen> {
   final _inputFocus = FocusNode();
   final List<_TerminalLine> _lines = [];
   final List<String> _history = [];
+  final TermuxBridgeService _bridge = TermuxBridgeService.instance;
+  StreamSubscription<BridgeConnectionState>? _stateSub;
+  StreamSubscription<String>? _outputSub;
   int _historyIndex = -1;
-  bool _isConnected = true;
+  bool _isConnected = false;
+  bool _isRunning = false;
 
   @override
   void initState() {
@@ -49,60 +56,103 @@ class _TerminalScreenState extends State<TerminalScreen> {
       ),
       const _TerminalLine(text: ''),
       const _TerminalLine(
-        text: 'Type commands or let agents execute actions.',
+        text: 'Type commands to execute them through the Termux bridge.',
         color: AppColors.textSecondary,
       ),
       const _TerminalLine(text: ''),
     ]);
+    _isConnected = _bridge.isConnected;
+    _stateSub = _bridge.stateStream.listen((state) {
+      if (!mounted) return;
+      setState(() => _isConnected = state == BridgeConnectionState.connected);
+    });
+    _outputSub = _bridge.outputStream.listen((line) {
+      if (!mounted) return;
+      _appendLine(line);
+    });
   }
 
   @override
   void dispose() {
+    _stateSub?.cancel();
+    _outputSub?.cancel();
     _inputController.dispose();
     _scrollController.dispose();
     _inputFocus.dispose();
     super.dispose();
   }
 
-  void _executeCommand(String cmd) {
+  Future<void> _executeCommand(String cmd) async {
     if (cmd.trim().isEmpty) return;
+    final command = cmd.trim();
 
     setState(() {
-      _history.add(cmd);
+      _history.add(command);
       _historyIndex = _history.length;
-      _lines.add(_TerminalLine(text: '\$ $cmd', color: AppColors.success));
-
-      // Simulated responses.
-      final output = switch (cmd.trim().split(' ').first) {
-        'ls' => 'lib/  test/  pubspec.yaml  README.md',
-        'pwd' => '/data/data/com.termux/files/home/termux_forge',
-        'echo' => cmd.replaceFirst('echo ', ''),
-        'clear' => null,
-        'help' =>
-          'Available: ls, pwd, echo, clear, help, dart, flutter',
-        _ =>
-          'Command executed: $cmd',
-      };
-
-      if (cmd.trim() == 'clear') {
+      if (command == 'clear') {
         _lines.clear();
-      } else if (output != null) {
-        _lines.add(_TerminalLine(text: output));
+      } else {
+        _lines.add(_TerminalLine(text: '\$ $command', color: AppColors.success));
+        _isRunning = true;
       }
-
-      _lines.add(const _TerminalLine(text: ''));
       _inputController.clear();
     });
+    _scrollToBottom();
 
-    // Scroll to bottom.
-    Future.delayed(const Duration(milliseconds: 50), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
+    if (command == 'clear') return;
+
+    final response = await _bridge.executeShell(
+      command,
+      workingDirectory: '/data/data/com.termux/files/home',
+      timeout: const Duration(minutes: 5),
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _isRunning = false;
+      if (response.error != null) {
+        _lines.add(_TerminalLine(
+          text: response.error!.message,
+          color: AppColors.error,
+        ));
+      } else {
+        final stdout = response.stdout.trimRight();
+        final stderr = response.stderr.trimRight();
+        if (stdout.isNotEmpty) {
+          for (final line in stdout.split('\n')) {
+            _lines.add(_TerminalLine(text: line));
+          }
+        }
+        if (stderr.isNotEmpty) {
+          for (final line in stderr.split('\n')) {
+            _lines.add(_TerminalLine(text: line, color: AppColors.error));
+          }
+        }
+        if (stdout.isEmpty && stderr.isEmpty) {
+          _lines.add(_TerminalLine(
+            text: 'Exit ${response.exitCode ?? 0}',
+            color: AppColors.textTertiary,
+          ));
+        }
       }
+      _lines.add(const _TerminalLine(text: ''));
+    });
+    _scrollToBottom();
+  }
+
+  void _appendLine(String text, {Color? color}) {
+    setState(() => _lines.add(_TerminalLine(text: text, color: color)));
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 50), () {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
     });
   }
 
@@ -133,9 +183,17 @@ class _TerminalScreenState extends State<TerminalScreen> {
         showBackButton: true,
         actions: [
           StatusBadge(
-            label: _isConnected ? 'Connected' : 'Disconnected',
-            color: _isConnected ? AppColors.success : AppColors.error,
-            pulsing: _isConnected,
+            label: _isRunning
+                ? 'Running'
+                : _isConnected
+                    ? 'Connected'
+                    : 'Disconnected',
+            color: _isRunning
+                ? AppColors.warning
+                : _isConnected
+                    ? AppColors.success
+                    : AppColors.error,
+            pulsing: _isConnected || _isRunning,
             size: BadgeSize.small,
           ),
           const SizedBox(width: 8),

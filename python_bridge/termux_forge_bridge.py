@@ -144,6 +144,7 @@ class TermuxForgeBridge:
 
         # ── Command execution ─────────────────────────────────────────
         r.register("execute_command", self._execute_command)
+        r.register("execute_shell", self._execute_command)
         r.register("kill_command", self._kill_command)
 
         # ── File operations ───────────────────────────────────────────
@@ -177,6 +178,7 @@ class TermuxForgeBridge:
         r.register("get_command_history", self._get_command_history)
 
         # ── Workspace / Version ───────────────────────────────────────
+        r.register("ping", self._ping)
         r.register("version_check", self._version_check)
         r.register("workspace_validate", self._workspace_validate)
 
@@ -482,6 +484,9 @@ class TermuxForgeBridge:
             "platform": sys.platform,
             "methods": self.router.list_methods(),
         }
+
+    async def _ping(self) -> dict:
+        return {"ok": True, "version": VERSION, "time": time.time()}
 
     async def _workspace_validate(self, path: str = DEFAULT_CWD) -> dict:
         p = Path(path)

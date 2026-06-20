@@ -1,5 +1,6 @@
 name: Build & Test
 on:
+  workflow_dispatch:
   push:
     branches: [main, develop]
   pull_request:
@@ -31,6 +32,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Analyze project
+        run: flutter analyze
 
 
 
@@ -91,7 +95,7 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Build release APK
-        run: flutter build apk --release || true
+        run: flutter build apk --release
 
       - name: Find generated APKs
         run: |

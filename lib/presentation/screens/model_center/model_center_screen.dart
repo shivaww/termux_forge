@@ -5,6 +5,9 @@
 /// AppStorage (SharedPreferences + FlutterSecureStorage).
 library;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:uuid/uuid.dart';
@@ -44,7 +47,7 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
     final loaded = await AppStorage.loadProviders();
     if (!mounted) return;
     setState(() {
-      _providers = loaded;
+      _providers = loaded.map(AppStorage.normalizeProvider).toList();
       _isLoading = false;
     });
   }
@@ -62,12 +65,16 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
     String modelName,
   ) async {
     final id = _uuid.v4();
-    final provider = <String, dynamic>{
+    final provider = AppStorage.normalizeProvider(<String, dynamic>{
       'id': id,
       'name': name,
-      'baseUrl': baseUrl,
+      'baseUrl': baseUrl.trim(),
       'modelName': modelName,
-    };
+      'model': modelName,
+      'defaultModel': modelName,
+      'models': [modelName],
+      'priority': _providers.length + 1,
+    });
     setState(() => _providers.add(provider));
     await AppStorage.saveApiKey(id, apiKey);
     await _saveProviders();
@@ -83,12 +90,16 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
     final idx = _providers.indexWhere((p) => p['id'] == id);
     if (idx == -1) return;
     setState(() {
-      _providers[idx] = {
+      _providers[idx] = AppStorage.normalizeProvider({
+        ..._providers[idx],
         'id': id,
         'name': name,
-        'baseUrl': baseUrl,
+        'baseUrl': baseUrl.trim(),
         'modelName': modelName,
-      };
+        'model': modelName,
+        'defaultModel': modelName,
+        'models': [modelName],
+      });
     });
     await AppStorage.saveApiKey(id, apiKey);
     await _saveProviders();
@@ -98,6 +109,118 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
     setState(() => _providers.removeWhere((p) => p['id'] == id));
     await AppStorage.deleteApiKey(id);
     await _saveProviders();
+  }
+
+  Future<List<String>> _discoverModels({
+    required String baseUrl,
+    required String apiKey,
+  }) async {
+    final endpoint = _modelsEndpoint(baseUrl);
+    final client = HttpClient();
+    try {
+      final request = await client.getUrl(Uri.parse(endpoint));
+      request.headers.set('Accept', 'application/json');
+      if (apiKey.trim().isNotEmpty) {
+        request.headers.set('Authorization', 'Bearer ${apiKey.trim()}');
+      }
+
+      final response = await request.close();
+      final body = await response.transform(utf8.decoder).join();
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw HttpException('HTTP ${response.statusCode}: $body');
+      }
+
+      final decoded = jsonDecode(body);
+      final rawModels = decoded is Map<String, dynamic>
+          ? decoded['data'] ?? decoded['models'] ?? decoded['items']
+          : decoded;
+      if (rawModels is! List) {
+        throw const FormatException('Provider did not return a model list');
+      }
+
+      final models = rawModels
+          .map((item) {
+            if (item is String) return item;
+            if (item is Map) {
+              return (item['id'] ??
+                      item['name'] ??
+                      item['model'] ??
+                      item['slug'])
+                  ?.toString();
+            }
+            return null;
+          })
+          .whereType<String>()
+          .map((model) => model.trim())
+          .where((model) => model.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+      if (models.isEmpty) {
+        throw const FormatException('No usable model IDs were returned');
+      }
+      return models;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  String _modelsEndpoint(String baseUrl) {
+    final clean = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (clean.endsWith('/models')) return clean;
+    if (clean.endsWith('/chat/completions')) {
+      return clean.replaceFirst(RegExp(r'/chat/completions$'), '/models');
+    }
+    return '$clean/models';
+  }
+
+  Future<void> _discoverAndPickModel({
+    required BuildContext context,
+    required TextEditingController urlCtrl,
+    required TextEditingController keyCtrl,
+    required TextEditingController modelCtrl,
+  }) async {
+    final baseUrl = urlCtrl.text.trim();
+    if (baseUrl.isEmpty) {
+      _showSnack('Enter a base URL first');
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final models = await _discoverModels(
+        baseUrl: baseUrl,
+        apiKey: keyCtrl.text.trim(),
+      );
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+
+      final selected = await showDialog<String>(
+        context: context,
+        builder: (_) => _ModelPickerDialog(models: models),
+      );
+      if (selected == null) return;
+      modelCtrl.text = selected;
+      _showSnack('Loaded ${models.length} models');
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      _showSnack('Model discovery failed: $e');
+    }
+  }
+
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   // ── bottom sheet ───────────────────────────────
@@ -111,8 +234,9 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
     final nameCtrl = TextEditingController(text: existing?['name'] ?? '');
     final keyCtrl = TextEditingController();
     final urlCtrl = TextEditingController(text: existing?['baseUrl'] ?? '');
-    final modelCtrl =
-        TextEditingController(text: existing?['modelName'] ?? '');
+    final modelCtrl = TextEditingController(
+      text: existing == null ? '' : AppStorage.providerModelName(existing),
+    );
 
     // Pre-fill existing API key (async).
     if (isEdit) {
@@ -180,11 +304,10 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
 
                   _SheetField(
                     controller: keyCtrl,
-                    label: 'API Key',
-                    hint: 'sk-...',
+                    label: 'API Key (optional)',
+                    hint: 'sk-... or blank for local/no-auth endpoints',
                     icon: Icons.vpn_key_outlined,
                     obscure: true,
-                    validator: _required,
                   ),
                   const SizedBox(height: 14),
 
@@ -204,6 +327,30 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
                     hint: 'anthropic/claude-sonnet-4',
                     icon: Icons.auto_awesome_outlined,
                     validator: _required,
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _discoverAndPickModel(
+                        context: ctx,
+                        urlCtrl: urlCtrl,
+                        keyCtrl: keyCtrl,
+                        modelCtrl: modelCtrl,
+                      ),
+                      icon: const Icon(Icons.sync_rounded, size: 18),
+                      label: const Text('Discover Models from API Key'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.accentTeal,
+                        side: BorderSide(
+                          color: AppColors.accentTeal.withValues(alpha: 0.45),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -474,7 +621,9 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                provider['modelName'] as String? ?? '—',
+                                AppStorage.providerModelName(provider).isEmpty
+                                    ? '-'
+                                    : AppStorage.providerModelName(provider),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,
@@ -567,6 +716,89 @@ class _ModelCenterScreenState extends State<ModelCenterScreen> {
 // ────────────────────────────────────────────────
 //  Private Widgets
 // ────────────────────────────────────────────────
+
+class _ModelPickerDialog extends StatefulWidget {
+  const _ModelPickerDialog({required this.models});
+
+  final List<String> models;
+
+  @override
+  State<_ModelPickerDialog> createState() => _ModelPickerDialogState();
+}
+
+class _ModelPickerDialogState extends State<_ModelPickerDialog> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = widget.models
+        .where((model) => model.toLowerCase().contains(_query.toLowerCase()))
+        .toList();
+
+    return AlertDialog(
+      backgroundColor: AppColors.backgroundTertiary,
+      title: const Text('Select Model'),
+      content: SizedBox(
+        width: 520,
+        height: 420,
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchCtrl,
+              onChanged: (value) => setState(() => _query = value),
+              decoration: const InputDecoration(
+                hintText: 'Search models',
+                prefixIcon: Icon(Icons.search_rounded),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: filtered.isEmpty
+                  ? const Center(child: Text('No matching models'))
+                  : ListView.separated(
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        color: AppColors.borderSubtle,
+                      ),
+                      itemBuilder: (_, index) {
+                        final model = filtered[index];
+                        return ListTile(
+                          dense: true,
+                          leading: const Icon(
+                            Icons.auto_awesome_outlined,
+                            size: 18,
+                            color: AppColors.accentTeal,
+                          ),
+                          title: Text(
+                            model,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () => Navigator.pop(context, model),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+  }
+}
 
 /// Styled text field used inside the provider bottom sheet.
 class _SheetField extends StatelessWidget {

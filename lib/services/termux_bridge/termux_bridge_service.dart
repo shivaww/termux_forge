@@ -248,9 +248,23 @@ class TermuxBridgeService {
     String? workingDirectory,
     Duration? timeout,
   }) async {
+    if (!isConnected) {
+      try {
+        await connect();
+      } catch (e) {
+        return BridgeResponse(
+          id: _uuid.v4(),
+          error: BridgeError(
+            code: BridgeErrorCodes.notConnected,
+            message: 'Bridge is not reachable at ws://$host:$port: $e',
+          ),
+        );
+      }
+    }
+
     final request = BridgeRequest(
       id: _uuid.v4(),
-      method: 'execute_shell',
+      method: 'execute_command',
       params: {
         'command': command,
         if (workingDirectory != null) 'cwd': workingDirectory,
@@ -332,9 +346,15 @@ class TermuxBridgeService {
     try {
       final json = jsonDecode(data as String) as Map<String, dynamic>;
 
-      // Handle streaming output.
-      if (json.containsKey('stream')) {
-        final line = json['stream'] as String;
+      // Handle streaming output broadcasts from Python bridge.
+      if (json['type'] == 'output') {
+        final streamName = json['stream']?.toString() ?? 'stdout';
+        final line = json['line']?.toString() ?? '';
+        _outputController.add('[$streamName] $line');
+        return;
+      }
+      if (json.containsKey('stream') && !json.containsKey('id')) {
+        final line = json['stream'].toString();
         _outputController.add(line);
         return;
       }
