@@ -270,6 +270,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
     await prefs.setString(_settingsKey, jsonEncode(metadata));
     await prefs.setString(_selectedProviderKey, _selectedProviderId);
     await prefs.setString('search_settings_v1', jsonEncode(_searchSettings.toJson()));
+    await prefs.setBool('agentic_enabled_v1', _agenticEnabled);
   }
 
   Future<void> _selectProvider(String providerId) async {
@@ -756,9 +757,16 @@ class _ChatHomePageState extends State<ChatHomePage> {
           settings: settings,
           cachedModels: models,
           searchSettings: _searchSettings,
+          agenticEnabled: _agenticEnabled,
           onSearchSettingsChanged: (nextSearchSettings) async {
             setState(() {
               _searchSettings = nextSearchSettings;
+            });
+            await _saveSettings();
+          },
+          onAgenticEnabledChanged: (val) async {
+            setState(() {
+              _agenticEnabled = val;
             });
             await _saveSettings();
           },
