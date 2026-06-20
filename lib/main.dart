@@ -2055,6 +2055,77 @@ class ChatClient {
     }
   }
 
+  Stream<String> sendChatStream({
+    required ProviderDefinition provider,
+    required ProviderSettings settings,
+    required String model,
+    required List<ChatMessage> messages,
+  }) async* {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 30);
+    try {
+      final uri = Uri.parse('${_baseUrl(provider, settings)}/chat/completions');
+      final request = await client.postUrl(uri);
+      _setHeaders(request, provider, settings, stream: true);
+      request.headers.contentType = ContentType.json;
+
+      final payload = <String, dynamic>{
+        'model': model,
+        'messages': messages
+            .map((message) => {
+                  'role': message.role.apiName,
+                  'content': message.text,
+                })
+            .toList(),
+        'max_tokens': settings.maxTokens,
+        'temperature': 1.0,
+        'top_p': 0.95,
+        'stream': true,
+      };
+
+      request.write(jsonEncode(payload));
+      final response = await request.close();
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        final body = await response.transform(utf8.decoder).join();
+        throw HttpException('HTTP ${response.statusCode}: $body');
+      }
+
+      final lines = response
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
+
+      await for (final line in lines) {
+        if (line.trim().isEmpty) continue;
+        if (line.startsWith('data: ')) {
+          final dataStr = line.substring(6).trim();
+          if (dataStr == '[DONE]') {
+            break;
+          }
+          try {
+            final decoded = jsonDecode(dataStr);
+            if (decoded is Map<String, dynamic>) {
+              final choices = decoded['choices'];
+              if (choices is List && choices.isNotEmpty) {
+                final first = choices.first;
+                if (first is Map) {
+                  final delta = first['delta'];
+                  if (delta is Map && delta['content'] != null) {
+                    yield delta['content'].toString();
+                  } else if (first['text'] != null) {
+                    yield first['text'].toString();
+                  }
+                }
+              }
+            }
+          } catch (_) {
+            // Ignore JSON decode errors of partial/empty lines
+          }
+        }
+      }
+    } finally {
+      client.close(force: true);
+    }
+  }
+
   String _baseUrl(ProviderDefinition provider, ProviderSettings settings) {
     final raw = settings.baseUrl.trim().isEmpty
         ? provider.baseUrl
