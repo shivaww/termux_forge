@@ -33,7 +33,7 @@
     </queries>
 
     <application
-        android:label="TermuxForge"
+        android:label="Forge Chat"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
