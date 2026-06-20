@@ -1757,6 +1757,9 @@ class MessageBubble extends StatelessWidget {
                         ),
                       );
                     }
+                    if (block.language.toLowerCase() == 'mermaid') {
+                      return MermaidDiagramWidget(code: block.content);
+                    }
                     return CodeBlockWidget(
                       code: block.content,
                       language: block.language,
@@ -3551,7 +3554,6 @@ class ProviderSettings {
       'reasoningEnabled': reasoningEnabled,
     };
   }
-}
 
   static int _readInt(dynamic value, int fallback) {
     if (value is int) return value;
@@ -4011,3 +4013,70 @@ const providerCatalog = <ProviderDefinition>[
     models: ['custom-model'],
   ),
 ];
+
+class MermaidDiagramWidget extends StatelessWidget {
+  const MermaidDiagramWidget({required this.code, super.key});
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final String base64Code = base64UrlEncode(utf8.encode(code));
+    final String url = 'https://mermaid.ink/img/$base64Code';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFDF9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE7D8C4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.account_tree_outlined, size: 16, color: Color(0xFF7B4E2E)),
+              SizedBox(width: 6),
+              Text(
+                'Mermaid Diagram',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF7B4E2E),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: InteractiveViewer(
+              panEnabled: true,
+              boundaryMargin: const EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image.network(
+                url,
+                errorBuilder: (context, error, stack) => Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Failed to load diagram.\nError: $error',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
