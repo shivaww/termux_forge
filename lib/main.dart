@@ -1167,17 +1167,15 @@ class ChatSurface extends StatelessWidget {
             child: ListView.builder(
               controller: scrollController,
               padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
-              itemCount: messages.length + (isSending ? 1 : 0),
+              itemCount: messages.length,
               itemBuilder: (context, index) {
-                if (index == messages.length) {
-                  return const TypingBubble();
-                }
                 return MessageBubble(
                   message: messages[index],
                   index: index,
                   providerShortName: provider.shortName,
                   providerName: provider.name,
                   reasoningEnabled: settings.reasoningEnabled,
+                  isTyping: isSending && index == messages.length - 1,
                   onEditUserMessage: () => onEditUserMessage(index),
                 );
               },
@@ -1700,6 +1698,7 @@ class MessageBubble extends StatelessWidget {
     required this.providerName,
     required this.reasoningEnabled,
     required this.onEditUserMessage,
+    this.isTyping = false,
     super.key,
   });
 
@@ -1708,6 +1707,7 @@ class MessageBubble extends StatelessWidget {
   final String providerShortName;
   final String providerName;
   final bool reasoningEnabled;
+  final bool isTyping;
   final VoidCallback onEditUserMessage;
 
   @override
@@ -1747,7 +1747,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                   ),
                 ] else ...[
-                  ProviderAvatar(label: providerShortName, small: true),
+                  ProviderAvatar(label: providerShortName, small: true, isTyping: isTyping),
                   const SizedBox(width: 8),
                   Text(
                     providerName,
@@ -3454,35 +3454,83 @@ class AppMark extends StatelessWidget {
   }
 }
 
-class ProviderAvatar extends StatelessWidget {
+class ProviderAvatar extends StatefulWidget {
   const ProviderAvatar({
     required this.label,
     this.small = false,
+    this.isTyping = false,
     super.key,
   });
 
   final String label;
   final bool small;
+  final bool isTyping;
+
+  @override
+  State<ProviderAvatar> createState() => _ProviderAvatarState();
+}
+
+class _ProviderAvatarState extends State<ProviderAvatar> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    if (widget.isTyping) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ProviderAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isTyping && !oldWidget.isTyping) {
+      _controller.repeat(reverse: true);
+    } else if (!widget.isTyping && oldWidget.isTyping) {
+      _controller.stop();
+      _controller.animateTo(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final size = small ? 24.0 : 38.0;
-    return Container(
+    final size = widget.small ? 24.0 : 38.0;
+    
+    final avatar = Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: const Color(0xFF3B3027),
-        borderRadius: BorderRadius.circular(small ? 8 : 13),
+        borderRadius: BorderRadius.circular(widget.small ? 8 : 13),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: const Color(0xFFFFE0A8),
-          fontSize: small ? 10 : 12,
-          fontWeight: FontWeight.w800,
-        ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(widget.small ? 8 : 13),
+        child: Image.asset('assets/icon.png', fit: BoxFit.cover, width: size, height: size),
       ),
+    );
+
+    if (!widget.isTyping) return avatar;
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.85 + (_controller.value * 0.15),
+          child: child,
+        );
+      },
+      child: avatar,
     );
   }
 }
