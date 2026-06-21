@@ -1229,6 +1229,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 attachedFiles: activeSession.attachedFiles,
                 onRemoveFile: _removeFile,
                 onEditUserMessage: _editUserMessage,
+                agenticWorkspace: _agenticWorkspace,
               ),
             ),
           ],
@@ -1357,6 +1358,7 @@ class ChatSurface extends StatelessWidget {
     required this.attachedFiles,
     required this.onRemoveFile,
     required this.onEditUserMessage,
+    required this.agenticWorkspace,
     super.key,
   });
 
@@ -1376,6 +1378,7 @@ class ChatSurface extends StatelessWidget {
   final List<AttachedFile> attachedFiles;
   final ValueChanged<int> onRemoveFile;
   final ValueChanged<int> onEditUserMessage;
+  final String agenticWorkspace;
 
   @override
   Widget build(BuildContext context) {
@@ -1426,7 +1429,7 @@ class ChatSurface extends StatelessWidget {
                   providerName: provider.name,
                   reasoningEnabled: settings.reasoningEnabled,
                   animationState: state,
-                  agenticWorkspace: _agenticWorkspace,
+                  agenticWorkspace: agenticWorkspace,
                   onEditUserMessage: () => onEditUserMessage(index),
                 );
               },
