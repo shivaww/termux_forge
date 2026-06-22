@@ -954,12 +954,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
     final currentDateStr = DateTime.now().toString().substring(0, 10);
     
     final systemPrompt = "You are an autonomous research agent. The current date/year is $currentDateStr. Make sure to search for the most up-to-date information for this period.\n"
-        "You have access to <search_request>query</search_request> (for web search) and <mcp_request>json</mcp_request> (for local file/command operations).\n"
+        "You have access to <search_request>query</search_request> (for web search), <read_url>url</read_url> (to extract full text from a webpage), and <mcp_request>json</mcp_request> (for local operations).\n"
         "For the current phase, perform thorough research:\n"
         "1. Conduct multiple <search_request> calls with distinct search queries to gather comprehensive data.\n"
-        "2. Analyze the search results thoroughly.\n"
-        "3. Keep your analysis in your memory/context for the final report.\n"
-        "CRITICAL: If you need to use <search_request> or <mcp_request>, output the tag and stop generating immediately in that turn. Do not generate any text after the tag.\n"
+        "2. IMPORTANT: Do not rely solely on search snippets! Use <read_url>url</read_url> to read the full content of promising links found in the search results.\n"
+        "3. Analyze the search results and webpage contents thoroughly.\n"
+        "4. Keep your analysis in your memory/context for the final report.\n"
+        "CRITICAL: If you need to use <search_request>, <read_url>, or <mcp_request>, output the tag and stop generating immediately in that turn. Do not generate any text after the tag.\n"
         "When you are completely finished researching and analyzing the current phase, output a detailed summary of your findings for this phase, list your source URLs, and then output a single line: <step_complete/>";
     
     // We maintain a single continuous conversation context for the entire research process
@@ -1034,6 +1035,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           stepMessages.add(ChatMessage(role: MessageRole.assistant, text: responseText, reasoning: reasoningText));
 
           final searchMatch = RegExp(r'<search_request>\s*([\s\S]*?)\s*</search_request>', caseSensitive: false, dotAll: true).firstMatch(responseText);
+          final readUrlMatch = RegExp(r'<read_url>\s*([\s\S]*?)\s*</read_url>', caseSensitive: false, dotAll: true).firstMatch(responseText);
           final mcpMatch = _findMcpMatch(responseText);
           final completeMatch = RegExp(r'<step_complete/?>', caseSensitive: false).firstMatch(responseText);
 
@@ -1063,6 +1065,31 @@ class _ChatHomePageState extends State<ChatHomePage> {
               searchResult = searchResult.substring(0, 4000) + '\n\n...[truncated]';
             }
             stepMessages.add(ChatMessage(role: MessageRole.user, text: "Search results:\n$searchResult"));
+          } else if (readUrlMatch != null) {
+            final url = readUrlMatch.group(1)?.trim() ?? '';
+            stepContent = stepContent.isEmpty ? '<read_url>$url</read_url>' : '$stepContent\n\n<read_url>$url</read_url>';
+            steps[i]['content'] = stepContent;
+            if (mounted) {
+              setState(() {
+                final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
+                msgs[messageIndex] = ChatMessage(role: MessageRole.assistant, text: '<research_state>${jsonEncode(stateMap)}</research_state>');
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
+              });
+            }
+            String urlResult = '';
+            try {
+              final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+              final request = await client.getUrl(Uri.parse('https://r.jina.ai/$url'));
+              final response = await request.close();
+              final body = await response.transform(utf8.decoder).join();
+              urlResult = body;
+              if (urlResult.length > 8000) {
+                urlResult = urlResult.substring(0, 8000) + '\n\n...[truncated]';
+              }
+            } catch (e) {
+              urlResult = 'Failed to read URL: $e';
+            }
+            stepMessages.add(ChatMessage(role: MessageRole.user, text: "URL Content:\n$urlResult"));
           } else if (mcpMatch != null) {
             String jsonString = mcpMatch.group(1)?.trim() ?? '';
             jsonString = jsonString.replaceAll(RegExp(r'^```json\s*'), '').replaceAll(RegExp(r'^```\s*'), '').replaceAll(RegExp(r'\s*```$'), '');
