@@ -5466,23 +5466,62 @@ const providerCatalog = <ProviderDefinition>[
   ),
 ];
 
-class MermaidDiagramWidget extends StatelessWidget {
+class MermaidDiagramWidget extends StatefulWidget {
   const MermaidDiagramWidget({required this.code, super.key});
   final String code;
 
   @override
-  Widget build(BuildContext context) {
-    final String jsonPayload = jsonEncode({
-      'code': code,
-      'mermaid': {'theme': 'default'}
-    });
-    final String base64Code = base64UrlEncode(utf8.encode(jsonPayload));
-    final String url = 'https://mermaid.ink/img/$base64Code';
+  State<MermaidDiagramWidget> createState() => _MermaidDiagramWidgetState();
+}
 
+class _MermaidDiagramWidgetState extends State<MermaidDiagramWidget> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final safeCode = widget.code.replaceAll('`', '\\`').replaceAll('\$', '\\\$');
+    final html = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; margin: 0; padding: 16px; background-color: #FFFDF9; height: 100vh; }
+    .mermaid { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+  </style>
+</head>
+<body>
+  <div class="mermaid">
+    \$safeCode
+  </div>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>
+''';
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0xFFFFFDF9))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            if (mounted) setState(() => _isLoading = false);
+          },
+        ),
+      )
+      ..loadHtmlString(html);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      height: 350,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFDF9),
         borderRadius: BorderRadius.circular(12),
@@ -5491,44 +5530,28 @@ class MermaidDiagramWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            children: [
-              Icon(Icons.account_tree_outlined, size: 16, color: Color(0xFF7B4E2E)),
-              SizedBox(width: 6),
-              Text(
-                'Mermaid Diagram',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF7B4E2E),
-                  fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                const Icon(Icons.account_tree_outlined, size: 16, color: Color(0xFF7B4E2E)),
+                const SizedBox(width: 6),
+                const Text(
+                  'Mermaid Diagram',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF7B4E2E), fontWeight: FontWeight.bold),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Center(
-            child: InteractiveViewer(
-              panEnabled: true,
-              boundaryMargin: const EdgeInsets.all(20),
-              minScale: 0.5,
-              maxScale: 4.0,
-              child: Image.network(
-                url,
-                errorBuilder: (context, error, stack) => Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Failed to load diagram.\nError: $error',
-                    style: const TextStyle(color: Colors.red),
-                  ),
+          Expanded(
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(11), bottomRight: Radius.circular(11)),
+                  child: WebViewWidget(controller: _controller),
                 ),
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return const Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: CircularProgressIndicator(),
-                  );
-                },
-              ),
+                if (_isLoading) const Center(child: CircularProgressIndicator(color: Color(0xFF7B4E2E))),
+              ],
             ),
           ),
         ],
@@ -5772,6 +5795,7 @@ class _ResearchPlanWidgetState extends State<ResearchPlanWidget> {
               ],
             );
           }).toList(),
+        ],
       ),
     );
   }
