@@ -418,8 +418,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   static const String mcpAndSearchSystemPrompt =
       "You have access to a web search tool and local Termux file system tools.\n"
-      "If you need to search the web, output a single line: [SEARCH_REQUEST: your search query] and stop generating.\n"
-      "If you need to use the local file system MCP server, output a single line: [MCP_REQUEST: {\"method\": \"...\", \"params\": {...}}] and stop generating.\n"
+      "If you need to search the web, output a single line: <search_request>your search query</search_request> and stop generating.\n"
+      "If you need to use the local file system MCP server, output a single line: <mcp_request>{\"method\": \"...\", \"params\": {...}}</mcp_request> and stop generating.\n"
       "MCP methods available:\n"
       "- file_read: params {path: string}\n"
       "- file_write: params {path: string, content: string}\n"
@@ -522,7 +522,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         String systemPromptText = '';
         if (_agenticEnabled) {
           systemPromptText += "You have access to local Termux file system tools.\n"
-              "If you need to use the local file system MCP server, output a single line: [MCP_REQUEST: {\"method\": \"...\", \"params\": {...}}] and stop generating.\n"
+              "If you need to use the local file system MCP server, output a single line: <mcp_request>{\"method\": \"...\", \"params\": {...}}</mcp_request> and stop generating.\n"
               "MCP methods available:\n"
               "- file_read: params {path: string}\n"
               "- file_write: params {path: string, content: string}\n"
@@ -534,7 +534,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
               "- file_search: params {path: string, pattern: string}\n"
               "- shell_exec: params {command: string, cwd: string (optional)}\n"
               "Once results are provided, continue your response.\n\n"
-              "CRITICAL: Do NOT refuse to create or edit files. You are fully capable of doing this via MCP_REQUEST. Just output the tag.\n"
+              "CRITICAL: Do NOT refuse to create or edit files. You are fully capable of doing this via <mcp_request>. Just output the tag.\n"
               "CRITICAL: NEVER use dangerous commands that will harm the device (like rm -rf /).\n";
               
           if (_customMcpUrl.isNotEmpty) {
@@ -546,7 +546,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         if (_searchSettings.enabled) {
           if (systemPromptText.isNotEmpty) systemPromptText += "\n\n";
           systemPromptText += "You ALSO have access to a web search tool.\n"
-              "If you need to search the web, output a single line: [SEARCH_REQUEST: your search query] and stop generating.";
+              "If you need to search the web, output a single line: <search_request>your search query</search_request> and stop generating.";
         }
 
         if (_deepResearchEnabled) {
@@ -646,8 +646,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
           _scrollToBottom();
         }
 
-        final searchRegex = RegExp(r'\[SEARCH_REQUEST:\s*(.*?)\]', dotAll: true);
-        final mcpRegex = RegExp(r'\[MCP_REQUEST:\s*(\{[\s\S]*?\})\s*\]');
+        final searchRegex = RegExp(r'<search_request>\s*([\s\S]*?)\s*</search_request>', caseSensitive: false, dotAll: true);
+        final mcpRegex = RegExp(r'<mcp_request>\s*(\{[\s\S]*?\})\s*</mcp_request>', caseSensitive: false);
         
         final searchMatch = searchRegex.firstMatch(fullText);
         final mcpMatch = _findMcpMatch(fullText);
@@ -689,7 +689,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
                 msgs[assistantMessageIndex] = ChatMessage(
                   role: MessageRole.assistant,
-                  text: fullText + '\n\n[RESEARCH_STATE: ${jsonEncode(stateMap)}]',
+                  text: fullText + '\n\n<research_state>${jsonEncode(stateMap)}</research_state>',
                   reasoning: reasoningText,
                 );
                 _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
@@ -827,7 +827,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
   }
 
   Match? _findMcpMatch(String fullText) {
-    final mcpStart = fullText.indexOf('[MCP_REQUEST:');
+    final mcpStart = fullText.indexOf('<mcp_request>');
     if (mcpStart == -1) return null;
     
     final jsonStart = fullText.indexOf('{', mcpStart);
@@ -836,10 +836,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
     final jsonEnd = _findMatchingBracket(fullText, jsonStart);
     if (jsonEnd == -1) return null;
     
-    final fullMatchStr = fullText.substring(mcpStart, fullText.indexOf(']', jsonEnd) + 1);
     final jsonStr = fullText.substring(jsonStart, jsonEnd + 1);
     
-    return RegExp(r'\[MCP_REQUEST:\s*(\{[\s\S]*?\})\s*\]').firstMatch('[MCP_REQUEST: $jsonStr]');
+    return RegExp(r'<mcp_request>\s*(\{[\s\S]*?\})\s*</mcp_request>', caseSensitive: false).firstMatch('<mcp_request>$jsonStr</mcp_request>');
   }
 
   int _findMatchingBracket(String text, int startIndex) {
@@ -886,9 +885,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
     if (sessionIndex == -1) return;
     
     final message = activeSession.messages[messageIndex];
-    if (!message.text.contains('[RESEARCH_STATE:')) return;
+    if (!message.text.contains('<research_state>')) return;
     
-    final stateStr = message.text.substring(message.text.indexOf('[RESEARCH_STATE: ') + 17, message.text.lastIndexOf(']')).trim();
+    final stateStr = message.text.substring(
+      message.text.indexOf('<research_state>') + 16, 
+      message.text.indexOf('</research_state>')
+    ).trim();
     try {
       final stateMap = jsonDecode(stateStr) as Map<String, dynamic>;
       stateMap['status'] = 'running';
@@ -899,9 +901,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
         msgs[messageIndex] = ChatMessage(
           role: MessageRole.assistant,
           text: message.text.replaceRange(
-            message.text.indexOf('[RESEARCH_STATE:'), 
-            message.text.lastIndexOf(']') + 1, 
-            '[RESEARCH_STATE: ${jsonEncode(stateMap)}]'
+            message.text.indexOf('<research_state>'), 
+            message.text.indexOf('</research_state>') + 17, 
+            '<research_state>${jsonEncode(stateMap)}</research_state>'
           ),
           reasoning: message.reasoning,
         );
@@ -933,16 +935,16 @@ class _ChatHomePageState extends State<ChatHomePage> {
     final fileName = _getResearchFileName(_sessions[sessionIndex].title);
     
     final systemPrompt = "You are an autonomous research agent.\n"
-        "You have access to SEARCH_REQUEST (for web search) and MCP_REQUEST (for local file/command operations).\n"
-        "Your output file is $fileName. Use MCP_REQUEST with method 'file_append' to append your phase findings directly to this file.\n"
+        "You have access to <search_request>query</search_request> (for web search) and <mcp_request>json</mcp_request> (for local file/command operations).\n"
+        "Your output file is $fileName. Use <mcp_request> with method 'file_append' to append your phase findings directly to this file.\n"
         "For the current phase, perform thorough research:\n"
-        "1. Conduct at least 3 to 5 different SEARCH_REQUEST calls with distinct search queries to gather comprehensive data from diverse sources.\n"
+        "1. Conduct at least 3 to 5 different <search_request> calls with distinct search queries to gather comprehensive data from diverse sources.\n"
         "2. Analyze the search results and compile your findings.\n"
         "3. Format your report beautifully with clear headings, detailed paragraphs, tables, and Mermaid flowcharts where appropriate.\n"
         "4. You MUST list all source URL links at the end of your phase findings in a 'Sources' section.\n"
         "5. Write/append this structured markdown block to $fileName using the 'file_append' MCP tool.\n\n"
-        "CRITICAL: If you need to use SEARCH_REQUEST or MCP_REQUEST, output the tag and stop generating immediately in that turn. Do not generate any text after the tag.\n"
-        "When you are completely finished with the current phase and have successfully appended its findings to the file, output a single line: [STEP_COMPLETE]";
+        "CRITICAL: If you need to use <search_request> or <mcp_request>, output the tag and stop generating immediately in that turn. Do not generate any text after the tag.\n"
+        "When you are completely finished with the current phase and have successfully appended its findings to the file, output a single line: <step_complete/>";
     
     // We maintain a single continuous conversation context for the entire research process
     List<ChatMessage> stepMessages = [
@@ -956,7 +958,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
         msgs[messageIndex] = ChatMessage(
           role: MessageRole.assistant,
-          text: '[RESEARCH_STATE: ${jsonEncode(stateMap)}]',
+          text: '<research_state>${jsonEncode(stateMap)}</research_state>',
         );
         _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
       });
@@ -1015,22 +1017,22 @@ class _ChatHomePageState extends State<ChatHomePage> {
           
           stepMessages.add(ChatMessage(role: MessageRole.assistant, text: responseText, reasoning: reasoningText));
 
-          final searchMatch = RegExp(r'\[SEARCH_REQUEST:\s*(.*?)\]', dotAll: true).firstMatch(responseText);
+          final searchMatch = RegExp(r'<search_request>\s*([\s\S]*?)\s*</search_request>', caseSensitive: false, dotAll: true).firstMatch(responseText);
           final mcpMatch = _findMcpMatch(responseText);
-          final completeMatch = RegExp(r'\[STEP_COMPLETE\]', dotAll: true).firstMatch(responseText);
+          final completeMatch = RegExp(r'<step_complete/?>', caseSensitive: false).firstMatch(responseText);
 
           if (completeMatch != null) {
-            final contentClean = responseText.replaceAll('[STEP_COMPLETE]', '').trim();
+            final contentClean = responseText.replaceAll(RegExp(r'<step_complete/?>', caseSensitive: false), '').trim();
             stepContent = stepContent.isEmpty ? contentClean : '$stepContent\n\n$contentClean';
             stepDone = true;
           } else if (searchMatch != null) {
             final query = searchMatch.group(1)?.trim() ?? '';
-            stepContent = stepContent.isEmpty ? '[SEARCH_REQUEST: $query]' : '$stepContent\n\n[SEARCH_REQUEST: $query]';
+            stepContent = stepContent.isEmpty ? '<search_request>$query</search_request>' : '$stepContent\n\n<search_request>$query</search_request>';
             steps[i]['content'] = stepContent;
             if (mounted) {
               setState(() {
                 final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
-                msgs[messageIndex] = ChatMessage(role: MessageRole.assistant, text: '[RESEARCH_STATE: ${jsonEncode(stateMap)}]');
+                msgs[messageIndex] = ChatMessage(role: MessageRole.assistant, text: '<research_state>${jsonEncode(stateMap)}</research_state>');
                 _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
               });
             }
@@ -1049,12 +1051,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
             String jsonString = mcpMatch.group(1)?.trim() ?? '';
             jsonString = jsonString.replaceAll(RegExp(r'^```json\s*'), '').replaceAll(RegExp(r'^```\s*'), '').replaceAll(RegExp(r'\s*```$'), '');
             
-            stepContent = stepContent.isEmpty ? '[MCP_REQUEST: $jsonString]' : '$stepContent\n\n[MCP_REQUEST: $jsonString]';
+            stepContent = stepContent.isEmpty ? '<mcp_request>$jsonString</mcp_request>' : '$stepContent\n\n<mcp_request>$jsonString</mcp_request>';
             steps[i]['content'] = stepContent;
             if (mounted) {
               setState(() {
                 final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
-                msgs[messageIndex] = ChatMessage(role: MessageRole.assistant, text: '[RESEARCH_STATE: ${jsonEncode(stateMap)}]');
+                msgs[messageIndex] = ChatMessage(role: MessageRole.assistant, text: '<research_state>${jsonEncode(stateMap)}</research_state>');
                 _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
               });
             }
@@ -1108,7 +1110,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
           msgs[messageIndex] = ChatMessage(
             role: MessageRole.assistant,
-            text: '[RESEARCH_STATE: ${jsonEncode(stateMap)}]',
+            text: '<research_state>${jsonEncode(stateMap)}</research_state>',
           );
           _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
         });
@@ -1122,7 +1124,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
         msgs[messageIndex] = ChatMessage(
           role: MessageRole.assistant,
-          text: '[RESEARCH_STATE: ${jsonEncode(stateMap)}]',
+          text: '<research_state>${jsonEncode(stateMap)}</research_state>',
         );
         _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
         _sendingSessionIds.remove(_sessions[sessionIndex].id);
@@ -1591,9 +1593,9 @@ class ChatSurface extends StatelessWidget {
                 AvatarAnimationState state = AvatarAnimationState.idle;
                 if (isSending && index == messages.length - 1) {
                   final msg = messages[index];
-                  if (msg.text.contains('[MCP_REQUEST:')) {
+                  if (msg.text.contains('<mcp_request>')) {
                     state = AvatarAnimationState.mcp;
-                  } else if (msg.text.contains('[SEARCH_REQUEST:')) {
+                  } else if (msg.text.contains('<search_request>')) {
                     state = AvatarAnimationState.searching;
                   } else if ((msg.reasoning?.isNotEmpty ?? false) && msg.text.isEmpty) {
                     state = AvatarAnimationState.reasoning;
@@ -2409,61 +2411,108 @@ class MessageBubble extends StatelessWidget {
             else ...[
               if (message.reasoning.isNotEmpty && reasoningEnabled)
                 ThoughtBlock(thought: message.reasoning),
-              if (message.text.startsWith('[RESEARCH_STATE:'))
+              if (message.text.contains('<research_state>'))
                 Builder(builder: (context) {
                   try {
-                    final startIndex = message.text.indexOf('[RESEARCH_STATE:');
-                    final jsonStr = message.text.substring(startIndex + 16, message.text.lastIndexOf(']')).trim();
+                    final startIndex = message.text.indexOf('<research_state>');
+                    final endIndex = message.text.indexOf('</research_state>');
+                    final jsonStr = message.text.substring(startIndex + 16, endIndex).trim();
                     final stateMap = jsonDecode(jsonStr) as Map<String, dynamic>;
-                    return ResearchPlanWidget(
-                      stateMap: stateMap,
-                      workspaceDir: agenticWorkspace,
-                      fileName: fileName,
-                      onStartResearch: onStartResearch,
+                    final textBefore = message.text.substring(0, startIndex).trim();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (textBefore.isNotEmpty) ...[
+                          ...parseContentBlocks(textBefore).map((block) {
+                            if (block.isCode) {
+                              if (block.language.toLowerCase() == 'math') {
+                                return Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFFCF6),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFFE7D8C4)),
+                                  ),
+                                  child: SelectableText(
+                                    convertLatexToUnicode(block.content),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2D241C),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return CodeBlockWidget(
+                                code: block.content,
+                                language: block.language,
+                              );
+                            }
+                            return StyledMarkdown(data: block.content);
+                          }),
+                          const SizedBox(height: 12),
+                        ],
+                        ResearchPlanWidget(
+                          stateMap: stateMap,
+                          workspaceDir: agenticWorkspace,
+                          fileName: fileName,
+                          onStartResearch: onStartResearch,
+                        ),
+                      ],
                     );
                   } catch (_) {
                     return const Text('Error rendering research state', style: TextStyle(color: Colors.red));
                   }
                 })
-              else if (message.text.startsWith('[SEARCH_REQUEST:'))
+              else if (message.text.contains('<search_request>'))
                 Builder(builder: (context) {
-                  final query = message.text
-                      .replaceFirst('[SEARCH_REQUEST:', '')
-                      .replaceFirst(']', '')
-                      .trim();
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F5FA),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFD0E0F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.search, color: Color(0xFF2B6CB0), size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Tool Use: Searched the web for "$query"',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2B6CB0),
+                  try {
+                    final startIndex = message.text.indexOf('<search_request>');
+                    final endIndex = message.text.indexOf('</search_request>');
+                    final query = message.text.substring(startIndex + 16, endIndex).trim();
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F5FA),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFD0E0F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.search, color: Color(0xFF2B6CB0), size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Tool Use: Searched the web for "$query"',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2B6CB0),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
+                        ],
+                      ),
+                    );
+                  } catch (_) {
+                    return const Text('Error rendering search request', style: TextStyle(color: Colors.red));
+                  }
                 })
-              else if (message.text.startsWith('[MCP_REQUEST:'))
+              else if (message.text.contains('<mcp_request>'))
                 Builder(builder: (context) {
-                  final jsonStr = message.text
-                      .replaceFirst('[MCP_REQUEST:', '')
-                      .replaceFirst(RegExp(r'\]$'), '')
-                      .trim();
-                  return McpToolBlock(mcpJson: jsonStr);
+                  try {
+                    final startIndex = message.text.indexOf('<mcp_request>');
+                    final endIndex = message.text.indexOf('</mcp_request>');
+                    final jsonStr = message.text.substring(startIndex + 13, endIndex).trim();
+                    return McpToolBlock(mcpJson: jsonStr);
+                  } catch (_) {
+                    return const Text('Error rendering MCP request', style: TextStyle(color: Colors.red));
+                  }
                 })
               else
                 ...parseContentBlocks(message.text).map((block) {
@@ -5409,11 +5458,11 @@ class _ResearchPlanWidgetState extends State<ResearchPlanWidget> {
                         ),
                         if (step['content'] != null && step['content'].toString().isNotEmpty)
                           ...step['content'].toString().split('\n\n').where((s) => s.trim().isNotEmpty).map((s) {
-                            if (s.startsWith('[MCP_REQUEST:')) {
-                              final jsonStr = s.replaceFirst('[MCP_REQUEST:', '').replaceFirst(RegExp(r'\]$'), '').trim();
+                            if (s.contains('<mcp_request>')) {
+                              final jsonStr = s.substring(s.indexOf('<mcp_request>') + 13, s.indexOf('</mcp_request>')).trim();
                               return McpToolBlock(mcpJson: jsonStr);
-                            } else if (s.startsWith('[SEARCH_REQUEST:')) {
-                              final query = s.replaceFirst('[SEARCH_REQUEST:', '').replaceFirst(']', '').trim();
+                            } else if (s.contains('<search_request>')) {
+                              final query = s.substring(s.indexOf('<search_request>') + 16, s.indexOf('</search_request>')).trim();
                               return Container(
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 padding: const EdgeInsets.all(12),
