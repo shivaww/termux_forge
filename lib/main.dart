@@ -986,6 +986,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
       String stepContent = '';
       int loopCount = 0;
+      int consecutive429s = 0;
       bool stepDone = false;
 
       while (!stepDone && loopCount < 15) {
@@ -1081,13 +1082,21 @@ class _ChatHomePageState extends State<ChatHomePage> {
             try {
               final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
               final request = await client.getUrl(Uri.parse('https://r.jina.ai/$url'));
+              final jinaKey = _searchSettings.apiKey;
+              if (jinaKey.isNotEmpty) {
+                request.headers.set('Authorization', 'Bearer $jinaKey');
+              }
               final response = await request.close();
               final body = await response.transform(utf8.decoder).join();
+              if (response.statusCode == 429 || response.statusCode == 402) {
+                throw HttpException('HTTP ${response.statusCode}: $body');
+              }
               urlResult = body;
               if (urlResult.length > 8000) {
                 urlResult = urlResult.substring(0, 8000) + '\n\n...[truncated]';
               }
             } catch (e) {
+              if (e.toString().contains('429')) rethrow;
               urlResult = 'Failed to read URL: $e';
             }
             stepMessages.add(ChatMessage(role: MessageRole.user, text: "URL Content:\n$urlResult"));
@@ -1140,11 +1149,18 @@ class _ChatHomePageState extends State<ChatHomePage> {
             stepContent = stepContent.isEmpty ? responseText : '$stepContent\n\n$responseText';
             stepDone = true;
           }
-          await Future.delayed(const Duration(seconds: 3));
+          await Future.delayed(const Duration(seconds: 8));
+          consecutive429s = 0;
         } catch (e) {
           final errorStr = e.toString().toLowerCase();
           if (errorStr.contains('429') || errorStr.contains('500') || errorStr.contains('503')) {
-            stepContent = stepContent.isEmpty ? "API rate limit or server error. Retrying in 10s..." : "$stepContent\n\nAPI rate limit or server error. Retrying in 10s...";
+            loopCount--;
+            consecutive429s++;
+            int delaySeconds = 10;
+            if (consecutive429s >= 3) delaySeconds = 40;
+            else if (consecutive429s == 2) delaySeconds = 20;
+
+            stepContent = stepContent.isEmpty ? "API rate limit or server error. Retrying in ${delaySeconds}s..." : "$stepContent\n\nAPI rate limit or server error. Retrying in ${delaySeconds}s...";
             steps[i]['content'] = stepContent;
             if (mounted) {
               setState(() {
@@ -1153,7 +1169,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
               });
             }
-            await Future.delayed(const Duration(seconds: 10));
+            await Future.delayed(Duration(seconds: delaySeconds));
           } else {
             stepContent = stepContent.isEmpty ? "Error during step: $e" : "$stepContent\n\nError during step: $e";
             stepDone = true;
@@ -4533,7 +4549,10 @@ class ChatClient {
           } catch (e) {
             lastException = e is Exception ? e : Exception(e.toString());
             final errorStr = e.toString().toLowerCase();
-            final isRateLimit = errorStr.contains('429') || errorStr.contains('402') || errorStr.contains('500') || errorStr.contains('503');
+            if (errorStr.contains('402')) {
+              throw lastException ?? Exception('Payment Required (402)');
+            }
+            final isRateLimit = errorStr.contains('429') || errorStr.contains('500') || errorStr.contains('503');
             if (!isRateLimit) break;
             if (retry < 2) await Future.delayed(const Duration(seconds: 20));
           }
@@ -4542,7 +4561,10 @@ class ChatClient {
         if (success && responseText != null) return responseText;
         
         final errorStr = lastException.toString().toLowerCase();
-        final isRateLimit = errorStr.contains('429') || errorStr.contains('402') || errorStr.contains('500') || errorStr.contains('503');
+        if (errorStr.contains('402')) {
+          throw lastException ?? Exception('Payment Required (402)');
+        }
+        final isRateLimit = errorStr.contains('429') || errorStr.contains('500') || errorStr.contains('503');
         if (!isRateLimit || i == allKeys.length - 1) {
           throw lastException ?? Exception('Unknown error');
         }
@@ -4633,7 +4655,10 @@ class ChatClient {
           } catch (e) {
             lastException = e is Exception ? e : Exception(e.toString());
             final errorStr = e.toString().toLowerCase();
-            final isRateLimit = errorStr.contains('429') || errorStr.contains('402') || errorStr.contains('500') || errorStr.contains('503');
+            if (errorStr.contains('402')) {
+              throw lastException ?? Exception('Payment Required (402)');
+            }
+            final isRateLimit = errorStr.contains('429') || errorStr.contains('500') || errorStr.contains('503');
             if (!isRateLimit) break;
             if (retry < 2) await Future.delayed(const Duration(seconds: 20));
           }
@@ -4641,7 +4666,10 @@ class ChatClient {
 
         if (!success || response == null) {
           final errorStr = lastException.toString().toLowerCase();
-          final isRateLimit = errorStr.contains('429') || errorStr.contains('402') || errorStr.contains('500') || errorStr.contains('503');
+          if (errorStr.contains('402')) {
+            throw lastException ?? Exception('Payment Required (402)');
+          }
+          final isRateLimit = errorStr.contains('429') || errorStr.contains('500') || errorStr.contains('503');
           if (!isRateLimit || i == allKeys.length - 1) {
             throw lastException ?? Exception('Unknown error');
           }
@@ -4728,6 +4756,8 @@ class ChatClient {
             final uri = Uri.parse('https://html.duckduckgo.com/html/?q=${Uri.encodeComponent(query)}');
             final request = await client.getUrl(uri);
             request.headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+            request.headers.set('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8');
+            request.headers.set('Accept-Language', 'en-US,en;q=0.5');
             final response = await request.close();
             if (response.statusCode < 200 || response.statusCode >= 300) {
               throw HttpException('HTTP ${response.statusCode}: Failed to fetch duckduckgo');
@@ -4738,10 +4768,10 @@ class ChatClient {
               return 'Web search failed: DuckDuckGo has blocked this request with a CAPTCHA. Please open the settings, enable Agentic Web Search, and select a provider like Tavily or Google with an API key.';
             }
             
-            final blockRegex = RegExp(r'<div class="result results_links[^>]*>([\s\S]*?)<div class="clear"></div>');
-            final titleRegex = RegExp(r'<h2 class="result__title">\s*<a[^>]*>([\s\S]*?)</a>');
-            final urlRegex = RegExp(r'href="//duckduckgo.com/l/\?uddg=([^"&]+)');
-            final snippetRegex = RegExp(r'<a class="result__snippet"[^>]*>([\s\S]*?)</a>');
+            final blockRegex = RegExp(r'<div[^>]*class="[^"]*result__body[^"]*"[^>]*>([\s\S]*?)(?=<div[^>]*class="[^"]*result__body[^"]*"[^>]*>|$)', caseSensitive: false);
+            final titleRegex = RegExp(r'<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>\s*<a[^>]*>([\s\S]*?)</a>', caseSensitive: false);
+            final urlRegex = RegExp(r'href="[^"]*(?:/l/\?uddg=|//duckduckgo\.com/l/\?uddg=)([^"&]+)', caseSensitive: false);
+            final snippetRegex = RegExp(r'<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>([\s\S]*?)</a>', caseSensitive: false);
             
             final results = <String>[];
             for (final match in blockRegex.allMatches(body)) {
