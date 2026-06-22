@@ -14,6 +14,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -2755,6 +2756,9 @@ class MessageBubble extends StatelessWidget {
         }
         if (block.language.toLowerCase() == 'mermaid') {
           return MermaidDiagramWidget(code: block.content);
+        }
+        if (block.language.toLowerCase() == 'svg') {
+          return SvgDiagramWidget(svgString: block.content);
         }
         if (block.language.toLowerCase() == 'chart' || block.language.toLowerCase() == 'json-chart') {
           return ChartDiagramWidget(jsonString: block.content);
@@ -5977,5 +5981,30 @@ class ChartDiagramWidget extends StatelessWidget {
         child: Text('Chart rendering error: $e', style: TextStyle(color: Colors.red.shade900)),
       );
     }
+  }
+}
+
+class SvgDiagramWidget extends StatelessWidget {
+  final String svgString;
+  const SvgDiagramWidget({super.key, required this.svgString});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE7D8C4)),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Center(
+        child: SvgPicture.string(
+          svgString,
+          placeholderBuilder: (context) => const CircularProgressIndicator(color: Color(0xFF7B4E2E)),
+        ),
+      ),
+    );
   }
 }
