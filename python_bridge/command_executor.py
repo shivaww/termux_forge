@@ -158,6 +158,11 @@ class CommandExecutor:
 
         # Prepare environment
         full_env = dict(os.environ)
+        termux_bin = "/data/data/com.termux/files/usr/bin"
+        current_path = full_env.get("PATH", "")
+        if termux_bin not in current_path:
+            full_env["PATH"] = f"{termux_bin}:{current_path}" if current_path else termux_bin
+            
         if env:
             full_env.update(env)
 

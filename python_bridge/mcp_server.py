@@ -90,6 +90,14 @@ class MCPServerHandler(http.server.BaseHTTPRequestHandler):
                 f.write(content)
             return {"success": True, "message": f"File written successfully: {params.get('path')}"}
             
+        elif method == "file_append":
+            path = self.resolve_path(params.get('path'), workspace_dir)
+            content = params.get('content', '')
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with open(path, 'a', encoding='utf-8') as f:
+                f.write(content)
+            return {"success": True, "message": f"Content appended successfully to: {params.get('path')}"}
+            
         elif method == "file_edit":
             path = self.resolve_path(params.get('path'), workspace_dir)
             if not path.is_file():
@@ -194,8 +202,29 @@ class MCPServerHandler(http.server.BaseHTTPRequestHandler):
                 return {"error": "Dangerous command rejected."}
                 
             cwd_path = self.resolve_path(params.get('cwd', ''), workspace_dir)
+            
+            # Prepare environment with Termux path prepended
+            full_env = dict(os.environ)
+            termux_bin = "/data/data/com.termux/files/usr/bin"
+            current_path = full_env.get("PATH", "")
+            if termux_bin not in current_path:
+                full_env["PATH"] = f"{termux_bin}:{current_path}" if current_path else termux_bin
+                
+            shell_path = os.environ.get("SHELL", "/data/data/com.termux/files/usr/bin/bash")
+            if not os.path.exists(shell_path):
+                shell_path = "/data/data/com.termux/files/usr/bin/sh"
+            if not os.path.exists(shell_path):
+                shell_path = "sh"
+                
             try:
-                proc = subprocess.run(command, shell=True, cwd=cwd_path, text=True, capture_output=True, timeout=60)
+                proc = subprocess.run(
+                    [shell_path, "-c", command],
+                    cwd=cwd_path,
+                    env=full_env,
+                    text=True,
+                    capture_output=True,
+                    timeout=60
+                )
                 output = proc.stdout + "\n" + proc.stderr
                 return {"exit_code": proc.returncode, "output": output.strip()[:8000]}
             except subprocess.TimeoutExpired:

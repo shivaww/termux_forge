@@ -551,8 +551,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
         if (_deepResearchEnabled) {
           if (systemPromptText.isNotEmpty) systemPromptText += "\n\n";
-          systemPromptText += "DEEP RESEARCH MODE ENABLED: For your first response, you MUST generate a comprehensive research plan. Output ONLY the following JSON format and nothing else:\n"
-            "[RESEARCH_PLAN: [{\"title\": \"Step 1\", \"prompt\": \"Detailed instructions for this step\"}, ...]]";
+          systemPromptText += "DEEP RESEARCH MODE ENABLED: For your first response, you MUST generate a comprehensive research plan using XML tags. Output ONLY the plan inside the tags and nothing else. Follow this exact format:\n"
+            "<research_plan>\n"
+            "  <phase1>Title of Phase 1: Detailed prompt/instructions for what you should accomplish in this phase</phase1>\n"
+            "  <phase2>Title of Phase 2: Detailed prompt/instructions for what you should accomplish in this phase</phase2>\n"
+            "  ...\n"
+            "</research_plan>\n"
+            "Limit the plan to a maximum of 15 phases.";
         }
 
         if (systemPromptText.isNotEmpty) {
@@ -647,49 +652,51 @@ class _ChatHomePageState extends State<ChatHomePage> {
         final searchMatch = searchRegex.firstMatch(fullText);
         final mcpMatch = _findMcpMatch(fullText);
 
-        if (fullText.contains('[RESEARCH_PLAN:')) {
-          final planStartIndex = fullText.indexOf('[RESEARCH_PLAN:');
-          
-          if (planStartIndex != -1) {
-            // Find the JSON array start after the tag
-            final jsonStart = fullText.indexOf('[', planStartIndex + 15);
-            if (jsonStart != -1) {
-              // Use balanced bracket counting to find the matching ']'
-              final planEndIndex = _findMatchingBracket(fullText, jsonStart);
-              if (planEndIndex != -1) {
-                String planJsonStr = fullText.substring(jsonStart, planEndIndex + 1).trim();
-                planJsonStr = planJsonStr.replaceAll(RegExp(r'^```json\s*'), '');
-                planJsonStr = planJsonStr.replaceAll(RegExp(r'^```\s*'), '');
-                planJsonStr = planJsonStr.replaceAll(RegExp(r'\s*```$'), '');
-                try {
-                  final planList = jsonDecode(planJsonStr) as List;
-                  final stateMap = {
-                    "status": "pending",
-                    "steps": planList.map((e) => {
-                      "title": e["title"] ?? 'Untitled Step',
-                      "prompt": e["prompt"] ?? '',
-                      "status": "pending",
-                      "content": ""
-                    } as Map<String, dynamic>).toList()
-                  };
-                  
-                  setState(() {
-                    final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
-                    msgs[assistantMessageIndex] = ChatMessage(
-                      role: MessageRole.assistant,
-                      text: fullText + '\n\n[RESEARCH_STATE: ${jsonEncode(stateMap)}]',
-                      reasoning: reasoningText,
-                    );
-                    _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
-                    _sendingSessionIds.remove(targetSessionId);
-                  });
-                  await _saveSessions();
-                  return;
-                } catch (e) {
-                  debugPrint('Error parsing research plan: $e');
+        if (fullText.contains('<research_plan>')) {
+          final planStart = fullText.indexOf('<research_plan>');
+          final planEnd = fullText.indexOf('</research_plan>', planStart);
+          if (planEnd != -1) {
+            final planContent = fullText.substring(planStart + 15, planEnd).trim();
+            final phaseRegex = RegExp(r'<phase(\d+)>(.*?)</phase\1>', dotAll: true);
+            final matches = phaseRegex.allMatches(planContent);
+            if (matches.isNotEmpty) {
+              final List<Map<String, dynamic>> stepsList = [];
+              for (final match in matches) {
+                final phaseNum = int.tryParse(match.group(1) ?? '') ?? 0;
+                final textContent = match.group(2)?.trim() ?? '';
+                
+                String title = 'Phase $phaseNum';
+                String prompt = textContent;
+                final separatorIndex = textContent.indexOf(RegExp(r'[:\-]'));
+                if (separatorIndex != -1) {
+                  title = textContent.substring(0, separatorIndex).trim();
+                  prompt = textContent.substring(separatorIndex + 1).trim();
                 }
-                break;
+                stepsList.add({
+                  "title": title,
+                  "prompt": prompt,
+                  "status": "pending",
+                  "content": ""
+                });
               }
+              
+              final stateMap = {
+                "status": "pending",
+                "steps": stepsList
+              };
+              
+              setState(() {
+                final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
+                msgs[assistantMessageIndex] = ChatMessage(
+                  role: MessageRole.assistant,
+                  text: fullText + '\n\n[RESEARCH_STATE: ${jsonEncode(stateMap)}]',
+                  reasoning: reasoningText,
+                );
+                _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
+                _sendingSessionIds.remove(targetSessionId);
+              });
+              await _saveSessions();
+              return;
             }
           }
         }
@@ -710,7 +717,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
             final searchResultRaw = await _chatClient.searchWeb(
               query,
               _searchSettings.provider,
-              _searchSettings.apiKey,
+              [_searchSettings.apiKey, ..._searchSettings.fallbackApiKeys],
               googleCx: _searchSettings.googleCx,
             );
             
@@ -865,6 +872,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
     return -1;
   }
 
+  String _getResearchFileName(String title) {
+    final slug = title.toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s\-]'), '')
+        .trim()
+        .replaceAll(RegExp(r'[\s\-]+'), '_');
+    return 'research_$slug.md';
+  }
+
   void _startResearchLoop(int messageIndex) {
     final activeSession = _sessions.firstWhere((s) => s.id == _activeSessionId);
     final sessionIndex = _sessions.indexOf(activeSession);
@@ -879,6 +894,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
       stateMap['status'] = 'running';
       
       setState(() {
+        _sendingSessionIds.add(_sessions[sessionIndex].id);
         final msgs = List<ChatMessage>.from(_sessions[sessionIndex].messages);
         msgs[messageIndex] = ChatMessage(
           role: MessageRole.assistant,
@@ -914,11 +930,24 @@ class _ChatHomePageState extends State<ChatHomePage> {
     required String model,
   }) async {
     final steps = stateMap['steps'] as List;
+    final fileName = _getResearchFileName(_sessions[sessionIndex].title);
+    
     final systemPrompt = "You are an autonomous research agent.\n"
-        "You have access to SEARCH_REQUEST and MCP_REQUEST.\n"
-        "Always use SEARCH_REQUEST first. Once you have the information, format it beautifully with Markdown tables or Mermaid flowcharts.\n"
-        "Then, use MCP_REQUEST to append the results to $_agenticWorkspace/research.md.\n"
-        "When you are completely finished with the step, output ONLY a single line: [STEP_COMPLETE]";
+        "You have access to SEARCH_REQUEST (for web search) and MCP_REQUEST (for local file/command operations).\n"
+        "Your output file is $fileName. Use MCP_REQUEST with method 'file_append' to append your phase findings directly to this file.\n"
+        "For the current phase, perform thorough research:\n"
+        "1. Conduct at least 3 to 5 different SEARCH_REQUEST calls with distinct search queries to gather comprehensive data from diverse sources.\n"
+        "2. Analyze the search results and compile your findings.\n"
+        "3. Format your report beautifully with clear headings, detailed paragraphs, tables, and Mermaid flowcharts where appropriate.\n"
+        "4. You MUST list all source URL links at the end of your phase findings in a 'Sources' section.\n"
+        "5. Write/append this structured markdown block to $fileName using the 'file_append' MCP tool.\n\n"
+        "CRITICAL: If you need to use SEARCH_REQUEST or MCP_REQUEST, output the tag and stop generating immediately in that turn. Do not generate any text after the tag.\n"
+        "When you are completely finished with the current phase and have successfully appended its findings to the file, output a single line: [STEP_COMPLETE]";
+    
+    // We maintain a single continuous conversation context for the entire research process
+    List<ChatMessage> stepMessages = [
+      ChatMessage(role: MessageRole.system, text: systemPrompt),
+    ];
     
     for (int i = 0; i < steps.length; i++) {
       if (!mounted) return;
@@ -932,11 +961,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
         _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
       });
 
-      final stepPrompt = "Research Step ${i + 1}: ${steps[i]['title']}\nInstructions: ${steps[i]['prompt']}";
-      List<ChatMessage> stepMessages = [
-        ChatMessage(role: MessageRole.system, text: systemPrompt),
-        ChatMessage(role: MessageRole.user, text: stepPrompt),
-      ];
+      final stepPrompt = "Research Phase ${i + 1}: ${steps[i]['title']}\nInstructions: ${steps[i]['prompt']}";
+      stepMessages.add(ChatMessage(role: MessageRole.user, text: stepPrompt));
 
       String stepContent = '';
       int loopCount = 0;
@@ -948,6 +974,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
         
         try {
           String responseText = '';
+          String reasoningText = '';
+          var isThinking = false;
+          
           final stream = _chatClient.sendChatStream(
             provider: provider,
             settings: settings,
@@ -956,22 +985,47 @@ class _ChatHomePageState extends State<ChatHomePage> {
           );
           
           await for (final chunk in stream) {
-            if (chunk.startsWith('[REASONING]')) continue;
-            responseText += chunk;
+            if (chunk.startsWith('[REASONING]')) {
+              reasoningText += chunk.substring(11);
+            } else {
+              var textChunk = chunk;
+              
+              if (!isThinking && (textChunk.contains('<think>') || textChunk.contains('<reasoning>') || textChunk.contains('<thought>'))) {
+                final tag = textChunk.contains('<think>') ? '<think>' : textChunk.contains('<thought>') ? '<thought>' : '<reasoning>';
+                final parts = textChunk.split(tag);
+                responseText += parts[0];
+                isThinking = true;
+                textChunk = parts.length > 1 ? parts.sublist(1).join(tag) : '';
+              }
+              
+              if (isThinking && (textChunk.contains('</think>') || textChunk.contains('</reasoning>') || textChunk.contains('</thought>'))) {
+                final tag = textChunk.contains('</think>') ? '</think>' : textChunk.contains('</thought>') ? '</thought>' : '</reasoning>';
+                final parts = textChunk.split(tag);
+                reasoningText += parts[0];
+                isThinking = false;
+                textChunk = parts.length > 1 ? parts.sublist(1).join(tag) : '';
+                responseText += textChunk;
+              } else if (isThinking) {
+                reasoningText += textChunk;
+              } else {
+                responseText += textChunk;
+              }
+            }
           }
           
-          stepMessages.add(ChatMessage(role: MessageRole.assistant, text: responseText));
+          stepMessages.add(ChatMessage(role: MessageRole.assistant, text: responseText, reasoning: reasoningText));
 
           final searchMatch = RegExp(r'\[SEARCH_REQUEST:\s*(.*?)\]', dotAll: true).firstMatch(responseText);
           final mcpMatch = _findMcpMatch(responseText);
           final completeMatch = RegExp(r'\[STEP_COMPLETE\]', dotAll: true).firstMatch(responseText);
 
           if (completeMatch != null) {
-            stepContent = responseText.replaceAll('[STEP_COMPLETE]', '').trim();
+            final contentClean = responseText.replaceAll('[STEP_COMPLETE]', '').trim();
+            stepContent = stepContent.isEmpty ? contentClean : '$stepContent\n\n$contentClean';
             stepDone = true;
           } else if (searchMatch != null) {
             final query = searchMatch.group(1)?.trim() ?? '';
-            stepContent += '\n\n[SEARCH_REQUEST: $query]\n\n';
+            stepContent = stepContent.isEmpty ? '[SEARCH_REQUEST: $query]' : '$stepContent\n\n[SEARCH_REQUEST: $query]';
             steps[i]['content'] = stepContent;
             if (mounted) {
               setState(() {
@@ -983,19 +1037,19 @@ class _ChatHomePageState extends State<ChatHomePage> {
             final searchResultRaw = await _chatClient.searchWeb(
               query,
               _searchSettings.provider,
-              _searchSettings.apiKey,
+              [_searchSettings.apiKey, ..._searchSettings.fallbackApiKeys],
               googleCx: _searchSettings.googleCx,
             );
             String searchResult = searchResultRaw;
             if (searchResult.length > 4000) {
               searchResult = searchResult.substring(0, 4000) + '\n\n...[truncated]';
             }
-            stepMessages.add(ChatMessage(role: MessageRole.system, text: "Search results:\n$searchResult"));
+            stepMessages.add(ChatMessage(role: MessageRole.user, text: "Search results:\n$searchResult"));
           } else if (mcpMatch != null) {
             String jsonString = mcpMatch.group(1)?.trim() ?? '';
             jsonString = jsonString.replaceAll(RegExp(r'^```json\s*'), '').replaceAll(RegExp(r'^```\s*'), '').replaceAll(RegExp(r'\s*```$'), '');
             
-            stepContent += '\n\n[MCP_REQUEST: $jsonString]\n\n';
+            stepContent = stepContent.isEmpty ? '[MCP_REQUEST: $jsonString]' : '$stepContent\n\n[MCP_REQUEST: $jsonString]';
             steps[i]['content'] = stepContent;
             if (mounted) {
               setState(() {
@@ -1035,14 +1089,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
             } catch (e) {
               mcpResult = '{"error": "$e"}';
             }
-            stepMessages.add(ChatMessage(role: MessageRole.system, text: "MCP Result:\n$mcpResult"));
+            stepMessages.add(ChatMessage(role: MessageRole.user, text: "MCP Result:\n$mcpResult"));
           } else {
-            stepContent = responseText;
+            stepContent = stepContent.isEmpty ? responseText : '$stepContent\n\n$responseText';
             stepDone = true;
           }
           await Future.delayed(const Duration(seconds: 2));
         } catch (e) {
-          stepContent = "Error during step: $e";
+          stepContent = stepContent.isEmpty ? "Error during step: $e" : "$stepContent\n\nError during step: $e";
           stepDone = true;
         }
       }
@@ -1073,7 +1127,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
         _sessions[sessionIndex] = _sessions[sessionIndex].copyWith(messages: msgs);
         _sendingSessionIds.remove(_sessions[sessionIndex].id);
       });
-      await _saveSessions();
     }
   }
 
@@ -1349,6 +1402,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 agenticWorkspace: _agenticWorkspace,
                 deepResearchEnabled: _deepResearchEnabled,
                 onStartResearch: _startResearchLoop,
+                fileName: _getResearchFileName(activeSession.title),
               ),
             ),
           ],
@@ -1480,6 +1534,7 @@ class ChatSurface extends StatelessWidget {
     required this.agenticWorkspace,
     required this.deepResearchEnabled,
     required this.onStartResearch,
+    required this.fileName,
     super.key,
   });
 
@@ -1490,6 +1545,7 @@ class ChatSurface extends StatelessWidget {
   final TextEditingController messageController;
   final ScrollController scrollController;
   final bool isSending;
+  final String fileName;
   final VoidCallback onOpenProvider;
   final VoidCallback onOpenModel;
   final VoidCallback onSend;
@@ -1553,6 +1609,7 @@ class ChatSurface extends StatelessWidget {
                   reasoningEnabled: settings.reasoningEnabled,
                   animationState: state,
                   agenticWorkspace: agenticWorkspace,
+                  fileName: fileName,
                   onEditUserMessage: () => onEditUserMessage(index),
                   onStartResearch: () => onStartResearch(index),
                 );
@@ -2156,6 +2213,7 @@ class MessageBubble extends StatelessWidget {
     required this.reasoningEnabled,
     required this.onEditUserMessage,
     required this.agenticWorkspace,
+    required this.fileName,
     this.animationState = AvatarAnimationState.idle,
     this.onStartResearch,
     super.key,
@@ -2167,6 +2225,7 @@ class MessageBubble extends StatelessWidget {
   final String providerName;
   final bool reasoningEnabled;
   final String agenticWorkspace;
+  final String fileName;
   final AvatarAnimationState animationState;
   final VoidCallback onEditUserMessage;
   final VoidCallback? onStartResearch;
@@ -2359,6 +2418,7 @@ class MessageBubble extends StatelessWidget {
                     return ResearchPlanWidget(
                       stateMap: stateMap,
                       workspaceDir: agenticWorkspace,
+                      fileName: fileName,
                       onStartResearch: onStartResearch,
                     );
                   } catch (_) {
@@ -2844,7 +2904,11 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
     _agenticEnabled = widget.agenticEnabled;
     _deepResearchEnabled = widget.deepResearchEnabled;
     _searchProvider = widget.searchSettings.provider;
-    _searchKeyController = TextEditingController(text: widget.searchSettings.apiKey);
+    final initialKeys = [
+      widget.searchSettings.apiKey,
+      ...widget.searchSettings.fallbackApiKeys
+    ].where((k) => k.isNotEmpty).join(', ');
+    _searchKeyController = TextEditingController(text: initialKeys);
     _searchCxController = TextEditingController(text: widget.searchSettings.googleCx);
     _agenticWorkspaceController = TextEditingController(text: widget.agenticWorkspace);
     _customMcpUrlController = TextEditingController(text: widget.customMcpUrl);
@@ -2944,11 +3008,18 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
   }
 
   void _updateSearchSettings() {
+    final rawKeyString = _searchKeyController.text.trim();
+    final keys = rawKeyString.split(',')
+        .map((k) => k.trim())
+        .where((k) => k.isNotEmpty)
+        .toList();
+        
     widget.onSearchSettingsChanged(
       SearchSettings(
         enabled: _searchEnabled,
         provider: _searchProvider,
-        apiKey: _searchKeyController.text.trim(),
+        apiKey: keys.isNotEmpty ? keys.first : '',
+        fallbackApiKeys: keys.length > 1 ? keys.sublist(1) : const [],
         googleCx: _searchCxController.text.trim(),
       ),
     );
@@ -3417,9 +3488,10 @@ class _MediaAndModelSheetState extends State<MediaAndModelSheet> {
               TextField(
                 controller: _searchKeyController,
                 decoration: const InputDecoration(
-                  labelText: 'Search API Key',
+                  labelText: 'Search API Key(s) (comma-separated for fallbacks)',
                   labelStyle: TextStyle(color: Color(0xFF6C5946)),
                   border: OutlineInputBorder(),
+                  hintText: 'key1, key2, key3...',
                 ),
                 obscureText: true,
                 onChanged: (_) => _updateSearchSettings(),
@@ -4360,67 +4432,98 @@ class ChatClient {
     }
   }
 
-  Future<String> searchWeb(String query, String provider, String apiKey, {String? googleCx}) async {
+  Future<String> searchWeb(
+    String query,
+    String provider,
+    List<String> apiKeys, {
+    String? googleCx,
+  }) async {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
     try {
-      if (provider == 'tavily') {
-        final uri = Uri.parse('https://api.tavily.com/search');
-        final request = await client.postUrl(uri);
-        request.headers.contentType = ContentType.json;
-        request.write(jsonEncode({
-          'api_key': apiKey,
-          'query': query,
-          'max_results': 4,
-        }));
-        final response = await request.close();
-        final body = await response.transform(utf8.decoder).join();
-        final decoded = jsonDecode(body);
-        if (decoded is Map && decoded['results'] is List) {
-          final results = decoded['results'] as List;
-          return results.map((r) => '- [${r['title']}](${r['url']}): ${r['content']}').join('\n\n');
-        }
-      } else if (provider == 'exa') {
-        final uri = Uri.parse('https://api.exa.ai/search');
-        final request = await client.postUrl(uri);
-        request.headers.set('x-api-key', apiKey);
-        request.headers.contentType = ContentType.json;
-        request.write(jsonEncode({
-          'query': query,
-          'numResults': 4,
-          'text': true,
-        }));
-        final response = await request.close();
-        final body = await response.transform(utf8.decoder).join();
-        final decoded = jsonDecode(body);
-        if (decoded is Map && decoded['results'] is List) {
-          final results = decoded['results'] as List;
-          return results.map((r) => '- [${r['title']}](${r['url']}): ${r['text'] ?? r['highlights']?.first ?? ''}').join('\n\n');
-        }
-      } else if (provider == 'firecrawl') {
-        final uri = Uri.parse('https://api.firecrawl.dev/v1/search');
-        final request = await client.postUrl(uri);
-        request.headers.set('Authorization', 'Bearer $apiKey');
-        request.headers.contentType = ContentType.json;
-        request.write(jsonEncode({
-          'query': query,
-          'limit': 4,
-        }));
-        final response = await request.close();
-        final body = await response.transform(utf8.decoder).join();
-        final decoded = jsonDecode(body);
-        if (decoded is Map && decoded['data'] is List) {
-          final results = decoded['data'] as List;
-          return results.map((r) => '- [${r['title'] ?? r['metadata']?['title']}](${r['url'] ?? r['metadata']?['source']}): ${r['markdown'] ?? r['snippet'] ?? ''}').join('\n\n');
-        }
-      } else if (provider == 'google') {
-        final uri = Uri.parse('https://www.googleapis.com/customsearch/v1?key=$apiKey&cx=${googleCx ?? ''}&q=${Uri.encodeComponent(query)}');
-        final request = await client.getUrl(uri);
-        final response = await request.close();
-        final body = await response.transform(utf8.decoder).join();
-        final decoded = jsonDecode(body);
-        if (decoded is Map && decoded['items'] is List) {
-          final results = decoded['items'] as List;
-          return results.map((r) => '- [${r['title']}](${r['link']}): ${r['snippet']}').join('\n\n');
+      final keys = apiKeys.where((k) => k.trim().isNotEmpty).toList();
+      if (keys.isEmpty) keys.add('');
+
+      for (int i = 0; i < keys.length; i++) {
+        final currentKey = keys[i];
+        try {
+          if (provider == 'tavily') {
+            final uri = Uri.parse('https://api.tavily.com/search');
+            final request = await client.postUrl(uri);
+            request.headers.contentType = ContentType.json;
+            request.write(jsonEncode({
+              'api_key': currentKey,
+              'query': query,
+              'max_results': 4,
+            }));
+            final response = await request.close();
+            final body = await response.transform(utf8.decoder).join();
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+              throw HttpException('HTTP ${response.statusCode}: $body');
+            }
+            final decoded = jsonDecode(body);
+            if (decoded is Map && decoded['results'] is List) {
+              final results = decoded['results'] as List;
+              return results.map((r) => '- [${r['title']}](${r['url']}): ${r['content']}').join('\n\n');
+            }
+          } else if (provider == 'exa') {
+            final uri = Uri.parse('https://api.exa.ai/search');
+            final request = await client.postUrl(uri);
+            request.headers.set('x-api-key', currentKey);
+            request.headers.contentType = ContentType.json;
+            request.write(jsonEncode({
+              'query': query,
+              'numResults': 4,
+              'text': true,
+            }));
+            final response = await request.close();
+            final body = await response.transform(utf8.decoder).join();
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+              throw HttpException('HTTP ${response.statusCode}: $body');
+            }
+            final decoded = jsonDecode(body);
+            if (decoded is Map && decoded['results'] is List) {
+              final results = decoded['results'] as List;
+              return results.map((r) => '- [${r['title']}](${r['url']}): ${r['text'] ?? r['highlights']?.first ?? ''}').join('\n\n');
+            }
+          } else if (provider == 'firecrawl') {
+            final uri = Uri.parse('https://api.firecrawl.dev/v1/search');
+            final request = await client.postUrl(uri);
+            request.headers.set('Authorization', 'Bearer $currentKey');
+            request.headers.contentType = ContentType.json;
+            request.write(jsonEncode({
+              'query': query,
+              'limit': 4,
+            }));
+            final response = await request.close();
+            final body = await response.transform(utf8.decoder).join();
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+              throw HttpException('HTTP ${response.statusCode}: $body');
+            }
+            final decoded = jsonDecode(body);
+            if (decoded is Map && decoded['data'] is List) {
+              final results = decoded['data'] as List;
+              return results.map((r) => '- [${r['title'] ?? r['metadata']?['title']}](${r['url'] ?? r['metadata']?['source']}): ${r['markdown'] ?? r['snippet'] ?? ''}').join('\n\n');
+            }
+          } else if (provider == 'google') {
+            final uri = Uri.parse('https://www.googleapis.com/customsearch/v1?key=$currentKey&cx=${googleCx ?? ''}&q=${Uri.encodeComponent(query)}');
+            final request = await client.getUrl(uri);
+            final response = await request.close();
+            final body = await response.transform(utf8.decoder).join();
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+              throw HttpException('HTTP ${response.statusCode}: $body');
+            }
+            final decoded = jsonDecode(body);
+            if (decoded is Map && decoded['items'] is List) {
+              final results = decoded['items'] as List;
+              return results.map((r) => '- [${r['title']}](${r['link']}): ${r['snippet']}').join('\n\n');
+            }
+          }
+        } catch (e) {
+          if (i < keys.length - 1) {
+            debugPrint('Search failed with key index $i: $e. Trying fallback key.');
+            continue;
+          }
+          rethrow;
         }
       }
       return 'No search results found.';
@@ -4581,12 +4684,14 @@ class SearchSettings {
   final bool enabled;
   final String provider; // 'tavily', 'exa', 'firecrawl', 'google'
   final String apiKey;
+  final List<String> fallbackApiKeys;
   final String googleCx; // Google Search Engine ID
 
   const SearchSettings({
     required this.enabled,
     required this.provider,
     required this.apiKey,
+    required this.fallbackApiKeys,
     required this.googleCx,
   });
 
@@ -4595,6 +4700,7 @@ class SearchSettings {
       enabled: false,
       provider: 'tavily',
       apiKey: '',
+      fallbackApiKeys: [],
       googleCx: '',
     );
   }
@@ -4604,6 +4710,10 @@ class SearchSettings {
       enabled: json['enabled'] as bool? ?? false,
       provider: json['provider']?.toString() ?? 'tavily',
       apiKey: json['apiKey']?.toString() ?? '',
+      fallbackApiKeys: (json['fallbackApiKeys'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
       googleCx: json['googleCx']?.toString() ?? '',
     );
   }
@@ -4612,6 +4722,7 @@ class SearchSettings {
         'enabled': enabled,
         'provider': provider,
         'apiKey': apiKey,
+        'fallbackApiKeys': fallbackApiKeys,
         'googleCx': googleCx,
       };
 
@@ -4619,12 +4730,14 @@ class SearchSettings {
     bool? enabled,
     String? provider,
     String? apiKey,
+    List<String>? fallbackApiKeys,
     String? googleCx,
   }) {
     return SearchSettings(
       enabled: enabled ?? this.enabled,
       provider: provider ?? this.provider,
       apiKey: apiKey ?? this.apiKey,
+      fallbackApiKeys: fallbackApiKeys ?? this.fallbackApiKeys,
       googleCx: googleCx ?? this.googleCx,
     );
   }
@@ -5120,9 +5233,10 @@ class MermaidDiagramWidget extends StatelessWidget {
 }
 
 class ResearchPlanWidget extends StatefulWidget {
-  const ResearchPlanWidget({required this.stateMap, required this.workspaceDir, this.onStartResearch, super.key});
+  const ResearchPlanWidget({required this.stateMap, required this.workspaceDir, required this.fileName, this.onStartResearch, super.key});
   final Map<String, dynamic> stateMap;
   final String workspaceDir;
+  final String fileName;
   final VoidCallback? onStartResearch;
 
   @override
@@ -5150,18 +5264,18 @@ class _ResearchPlanWidgetState extends State<ResearchPlanWidget> {
   }
 
   Future<void> _downloadFile() async {
-    final path = '${widget.workspaceDir}/research.md';
+    final path = '${widget.workspaceDir}/${widget.fileName}';
     final file = File(path);
     if (!await file.exists()) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('research.md not found yet.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.fileName} not found yet.')));
       }
       return;
     }
     
     final result = await FilePicker.platform.saveFile(
       dialogTitle: 'Save Research File',
-      fileName: 'research.md',
+      fileName: widget.fileName,
     );
     
     if (result != null) {
