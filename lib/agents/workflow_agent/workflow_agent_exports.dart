@@ -4,4 +4,4 @@
 /// Barrel export for the workflow agent module.
 library;
 
-export 'package:termux_forge/agents/workflow_agent/workflow_agent_impl.dart';
+export 'package:nexon/agents/workflow_agent/workflow_agent_impl.dart';

@@ -4,4 +4,4 @@
 /// Barrel export for the frontend expert agent module.
 library;
 
-export 'package:termux_forge/agents/frontend_expert/frontend_expert_agent.dart';
+export 'package:nexon/agents/frontend_expert/frontend_expert_agent.dart';

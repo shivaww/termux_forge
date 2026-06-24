@@ -6,9 +6,9 @@
 
 import 'dart:async';
 
-import 'package:termux_forge/services/tool_registry/tool_registry_types.dart';
-import 'package:termux_forge/services/event_bus/event_bus.dart';
-import 'package:termux_forge/services/event_bus/event_types.dart';
+import 'package:nexon/services/tool_registry/tool_registry_types.dart';
+import 'package:nexon/services/event_bus/event_bus.dart';
+import 'package:nexon/services/event_bus/event_types.dart';
 
 /// Central registry for all tools available in TermuxForge.
 ///

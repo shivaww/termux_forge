@@ -7,9 +7,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
-import 'package:termux_forge/presentation/widgets/forge_app_bar.dart';
-import 'package:termux_forge/presentation/widgets/glass_card.dart';
+import 'package:nexon/core/theme/app_colors.dart';
+import 'package:nexon/presentation/widgets/forge_app_bar.dart';
+import 'package:nexon/presentation/widgets/glass_card.dart';
 
 /// A node in the file tree.
 class _FileNode {

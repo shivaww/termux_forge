@@ -19,7 +19,7 @@ import 'dart:async';
 
 import 'package:uuid/uuid.dart';
 
-import 'package:termux_forge/agents/base/agent_exports.dart';
+import 'package:nexon/agents/base/agent_exports.dart';
 
 const _uuid = Uuid();
 

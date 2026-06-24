@@ -4,4 +4,4 @@
 /// Barrel export for the debugger agent module.
 library;
 
-export 'package:termux_forge/agents/debugger/debugger_agent.dart';
+export 'package:nexon/agents/debugger/debugger_agent.dart';

@@ -8,7 +8,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
+import 'package:nexon/core/theme/app_colors.dart';
 
 /// Size variants for [StatusBadge].
 enum BadgeSize { small, medium, large }

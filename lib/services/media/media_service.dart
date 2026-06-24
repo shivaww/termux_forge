@@ -5,7 +5,7 @@
 /// tracking job status, and linking outputs to the artifact system.
 library;
 
-import 'package:termux_forge/data/models/media_model.dart';
+import 'package:nexon/data/models/media_model.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 

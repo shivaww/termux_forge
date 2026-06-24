@@ -10,9 +10,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:re_editor/re_editor.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
-import 'package:termux_forge/presentation/widgets/forge_app_bar.dart';
-import 'package:termux_forge/presentation/widgets/status_badge.dart';
+import 'package:nexon/core/theme/app_colors.dart';
+import 'package:nexon/presentation/widgets/forge_app_bar.dart';
+import 'package:nexon/presentation/widgets/status_badge.dart';
 
 /// Represents a single editor tab.
 class _EditorTab {
@@ -48,7 +48,7 @@ class _EditorScreenState extends State<EditorScreen> {
       content: '''import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:termux_forge/app.dart';
+import 'package:nexon/app.dart';
 
 void main() {
   runApp(

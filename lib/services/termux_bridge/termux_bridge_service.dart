@@ -9,9 +9,9 @@ import 'dart:io';
 
 import 'package:uuid/uuid.dart';
 
-import 'package:termux_forge/services/termux_bridge/bridge_protocol.dart';
-import 'package:termux_forge/services/event_bus/event_bus.dart';
-import 'package:termux_forge/services/event_bus/event_types.dart';
+import 'package:nexon/services/termux_bridge/bridge_protocol.dart';
+import 'package:nexon/services/event_bus/event_bus.dart';
+import 'package:nexon/services/event_bus/event_types.dart';
 
 /// The connection state of the bridge.
 enum BridgeConnectionState {

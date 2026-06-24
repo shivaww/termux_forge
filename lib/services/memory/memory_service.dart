@@ -7,7 +7,7 @@
 /// can be swapped without touching business logic.
 library;
 
-import 'package:termux_forge/data/models/project_memory_model.dart';
+import 'package:nexon/data/models/project_memory_model.dart';
 import 'package:uuid/uuid.dart';
 import 'package:logger/logger.dart';
 

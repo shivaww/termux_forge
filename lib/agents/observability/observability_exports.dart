@@ -4,4 +4,4 @@
 /// Barrel export for the observability agent module.
 library;
 
-export 'package:termux_forge/agents/observability/observability_agent.dart';
+export 'package:nexon/agents/observability/observability_agent.dart';

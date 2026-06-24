@@ -11,14 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
-import 'package:termux_forge/presentation/layouts/responsive_layout.dart';
-import 'package:termux_forge/presentation/layouts/split_view.dart';
-import 'package:termux_forge/presentation/widgets/agent_avatar.dart';
-import 'package:termux_forge/presentation/widgets/forge_app_bar.dart';
-import 'package:termux_forge/presentation/widgets/glass_card.dart';
-import 'package:termux_forge/presentation/widgets/mode_selector.dart';
-import 'package:termux_forge/presentation/widgets/status_badge.dart';
+import 'package:nexon/core/theme/app_colors.dart';
+import 'package:nexon/presentation/layouts/responsive_layout.dart';
+import 'package:nexon/presentation/layouts/split_view.dart';
+import 'package:nexon/presentation/widgets/agent_avatar.dart';
+import 'package:nexon/presentation/widgets/forge_app_bar.dart';
+import 'package:nexon/presentation/widgets/glass_card.dart';
+import 'package:nexon/presentation/widgets/mode_selector.dart';
+import 'package:nexon/presentation/widgets/status_badge.dart';
 
 /// The main IDE home screen.
 class HomeScreen extends StatefulWidget {

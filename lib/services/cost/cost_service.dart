@@ -6,8 +6,8 @@
 
 import 'dart:async';
 
-import 'package:termux_forge/services/event_bus/event_bus.dart';
-import 'package:termux_forge/services/event_bus/event_types.dart';
+import 'package:nexon/services/event_bus/event_bus.dart';
+import 'package:nexon/services/event_bus/event_types.dart';
 
 // ---------------------------------------------------------------------------
 // Data Models

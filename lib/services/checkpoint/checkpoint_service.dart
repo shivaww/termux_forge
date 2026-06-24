@@ -5,7 +5,7 @@
 /// memory state so the system can roll back to a known-good point.
 library;
 
-import 'package:termux_forge/data/models/checkpoint_model.dart';
+import 'package:nexon/data/models/checkpoint_model.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 

@@ -3,7 +3,7 @@
 // All domain event classes used throughout the application.
 // ============================================================================
 
-import 'package:termux_forge/services/event_bus/event_bus.dart';
+import 'package:nexon/services/event_bus/event_bus.dart';
 
 // ---------------------------------------------------------------------------
 // Task Events

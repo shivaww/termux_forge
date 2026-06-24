@@ -9,7 +9,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
+import 'package:nexon/core/theme/app_colors.dart';
 
 /// A circular progress indicator with centered percentage text.
 ///

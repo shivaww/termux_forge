@@ -7,8 +7,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
-import 'package:termux_forge/presentation/widgets/status_badge.dart';
+import 'package:nexon/core/theme/app_colors.dart';
+import 'package:nexon/presentation/widgets/status_badge.dart';
 
 /// The primary app bar used across all screens.
 ///

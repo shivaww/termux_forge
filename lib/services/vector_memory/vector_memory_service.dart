@@ -11,7 +11,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:termux_forge/data/models/project_memory_model.dart';
+import 'package:nexon/data/models/project_memory_model.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 

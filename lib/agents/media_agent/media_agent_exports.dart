@@ -4,4 +4,4 @@
 /// Barrel export for the media agent module.
 library;
 
-export 'package:termux_forge/agents/media_agent/media_agent_impl.dart';
+export 'package:nexon/agents/media_agent/media_agent_impl.dart';

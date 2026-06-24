@@ -1,0 +1,1451 @@
+Analyze & Lint	Set up job	﻿2026-06-20T12:45:25.9577673Z Current runner version: '2.335.1'
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9607425Z ##[group]Runner Image Provisioner
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9608390Z Hosted Compute Agent
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9609228Z Version: 20260611.554
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9610069Z Commit: 5e0782fdc9014723d3be820dd114dd31555c2bd1
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9610895Z Build Date: 2026-06-11T21:40:46Z
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9611651Z Worker ID: {5f127273-6d79-4a0f-8d32-a49a562dea96}
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9612363Z Azure Region: eastus
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9613030Z ##[endgroup]
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9614849Z ##[group]Operating System
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9615604Z Ubuntu
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9616217Z 24.04.4
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9616753Z LTS
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9617385Z ##[endgroup]
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9617957Z ##[group]Runner Image
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9618595Z Image: ubuntu-24.04
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9619412Z Version: 20260615.205.1
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9620499Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260615.205/images/ubuntu/Ubuntu2404-Readme.md
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9622319Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260615.205
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9623373Z ##[endgroup]
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9624625Z ##[group]GITHUB_TOKEN Permissions
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9627442Z Contents: read
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9628133Z Metadata: read
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9628718Z Packages: read
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9629579Z ##[endgroup]
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9631720Z Secret source: Actions
+Analyze & Lint	Set up job	2026-06-20T12:45:25.9632897Z Prepare workflow directory
+Analyze & Lint	Set up job	2026-06-20T12:45:26.0023003Z Prepare all required actions
+Analyze & Lint	Set up job	2026-06-20T12:45:26.0060730Z Getting action download info
+Analyze & Lint	Set up job	2026-06-20T12:45:26.2618733Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Analyze & Lint	Set up job	2026-06-20T12:45:26.3317388Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+Analyze & Lint	Set up job	2026-06-20T12:45:26.5452387Z Getting action download info
+Analyze & Lint	Set up job	2026-06-20T12:45:26.6043449Z Download action repository 'actions/cache@v5' (SHA:27d5ce7f107fe9357f9df03efb73ab90386fccae)
+Analyze & Lint	Set up job	2026-06-20T12:45:26.7409524Z Complete job name: Analyze & Lint
+Analyze & Lint	Checkout	﻿2026-06-20T12:45:26.8102237Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8111162Z ##[group]Run actions/checkout@v4
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8111873Z with:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8112315Z   repository: shivaww/termux_forge
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8116752Z   token: ***
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8117205Z   ssh-strict: true
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8117646Z   ssh-user: git
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8118098Z   persist-credentials: true
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8118590Z   clean: true
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8119230Z   sparse-checkout-cone-mode: true
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8119756Z   fetch-depth: 1
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8120190Z   fetch-tags: false
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8120632Z   show-progress: true
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8121107Z   lfs: false
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8121523Z   submodules: false
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8122011Z   set-safe-directory: true
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8122808Z env:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8123225Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8123695Z   JAVA_VERSION: 17
+Analyze & Lint	Checkout	2026-06-20T12:45:26.8124115Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9094511Z Syncing repository: shivaww/termux_forge
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9096510Z ##[group]Getting Git version info
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9097419Z Working directory is '/home/runner/work/termux_forge/termux_forge'
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9098502Z [command]/usr/bin/git version
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9137972Z git version 2.54.0
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9157802Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9171744Z Temporarily overriding HOME='/home/runner/work/_temp/28f79da5-c7cf-4130-850a-917d4fc03242' before making global git config changes
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9173639Z Adding repository directory to the temporary git global config as a safe directory
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9176831Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux_forge/termux_forge
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9221712Z Deleting the contents of '/home/runner/work/termux_forge/termux_forge'
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9225663Z ##[group]Initializing the repository
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9229992Z [command]/usr/bin/git init /home/runner/work/termux_forge/termux_forge
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9340419Z hint: Using 'master' as the name for the initial branch. This default branch name
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9341728Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9342793Z hint: to use in all of your new repositories, which will suppress this warning,
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9343963Z hint: call:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9344626Z hint:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9345409Z hint: 	git config --global init.defaultBranch <name>
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9346378Z hint:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9347316Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9348757Z hint: 'development'. The just-created branch can be renamed via this command:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9350164Z hint:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9350859Z hint: 	git branch -m <name>
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9351614Z hint:
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9352579Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9354315Z Initialized empty Git repository in /home/runner/work/termux_forge/termux_forge/.git/
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9357094Z [command]/usr/bin/git remote add origin https://github.com/shivaww/termux_forge
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9430186Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9431409Z ##[group]Disabling automatic garbage collection
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9434644Z [command]/usr/bin/git config --local gc.auto 0
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9465569Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9474957Z ##[group]Setting up auth
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9475741Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9512282Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9861634Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Analyze & Lint	Checkout	2026-06-20T12:45:26.9898856Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Analyze & Lint	Checkout	2026-06-20T12:45:27.0162943Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Analyze & Lint	Checkout	2026-06-20T12:45:27.0197983Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Analyze & Lint	Checkout	2026-06-20T12:45:27.0448144Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Analyze & Lint	Checkout	2026-06-20T12:45:27.0489649Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:27.0490888Z ##[group]Fetching the repository
+Analyze & Lint	Checkout	2026-06-20T12:45:27.0499557Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f4cf3e5cb08af630075438f4d654880b288c01b4:refs/remotes/origin/main
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2823851Z From https://github.com/shivaww/termux_forge
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2825426Z  * [new ref]         f4cf3e5cb08af630075438f4d654880b288c01b4 -> origin/main
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2862310Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2863598Z ##[group]Determining the checkout info
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2864950Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2867418Z [command]/usr/bin/git sparse-checkout disable
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2914244Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2944752Z ##[group]Checking out the ref
+Analyze & Lint	Checkout	2026-06-20T12:45:27.2949410Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Analyze & Lint	Checkout	2026-06-20T12:45:27.3142266Z Switched to a new branch 'main'
+Analyze & Lint	Checkout	2026-06-20T12:45:27.3146867Z branch 'main' set up to track 'origin/main'.
+Analyze & Lint	Checkout	2026-06-20T12:45:27.3152682Z ##[endgroup]
+Analyze & Lint	Checkout	2026-06-20T12:45:27.3198223Z [command]/usr/bin/git log -1 --format=%H
+Analyze & Lint	Checkout	2026-06-20T12:45:27.3223240Z f4cf3e5cb08af630075438f4d654880b288c01b4
+Analyze & Lint	Setup Flutter	﻿2026-06-20T12:45:27.3905337Z ##[group]Run subosito/flutter-action@v2
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3906549Z with:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3907369Z   flutter-version: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3908319Z   channel: stable
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3909330Z   cache: true
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3910186Z   architecture: X64
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3911084Z   pub-cache-path: default
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3912030Z   dry-run: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3913049Z   git-source: https://github.com/flutter/flutter.git
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3914274Z env:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3915080Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3916032Z   JAVA_VERSION: 17
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.3916872Z ##[endgroup]
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4066838Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4068282Z ^[[36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4208783Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4210501Z env:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4211267Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4212165Z   JAVA_VERSION: 17
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4213022Z ##[endgroup]
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4390994Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4392346Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh -p \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4393464Z ^[[36;1m  -n '3.32.x' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4394353Z ^[[36;1m  -f '' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4395172Z ^[[36;1m  -a 'X64' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4396014Z ^[[36;1m  -k '' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4396828Z ^[[36;1m  -c '' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4397647Z ^[[36;1m  -l '' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4398493Z ^[[36;1m  -d 'default' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4399905Z ^[[36;1m  -g 'https://github.com/flutter/flutter.git' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4401148Z ^[[36;1m  stable^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4435352Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4436631Z env:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4437445Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4438366Z   JAVA_VERSION: 17
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.4439378Z ##[endgroup]
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6249796Z ##[group]Run actions/cache@v5
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6250884Z with:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6251810Z   path: /opt/hostedtoolcache/flutter/stable-3.32.8-x64
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6253519Z   key: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6255113Z   enableCrossOsArchive: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6256093Z   fail-on-cache-miss: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6257010Z   lookup-only: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6257848Z   save-always: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6258658Z env:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6259572Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6260464Z   JAVA_VERSION: 17
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.6261261Z ##[endgroup]
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:27.8327862Z Cache hit for: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:28.9063547Z Received 268435456 of 1567761209 (17.1%), 249.8 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:29.9080667Z Received 553648128 of 1567761209 (35.3%), 260.7 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:30.9070700Z Received 864026624 of 1567761209 (55.1%), 272.4 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:31.9072904Z Received 1140850688 of 1567761209 (72.8%), 270.3 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:32.9086201Z Received 1455423488 of 1567761209 (92.8%), 276.1 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:33.3860589Z Received 1567761209 of 1567761209 (100.0%), 271.6 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:33.3869997Z Cache Size: ~1495 MB (1567761209 B)
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:33.3908594Z [command]/usr/bin/tar -xf /home/runner/work/_temp/184fa24e-1c4d-41e7-8d35-d0cf4d69e198/cache.tzst -P -C /home/runner/work/termux_forge/termux_forge --use-compress-program unzstd
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:37.6729667Z Cache restored successfully
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.5619850Z Cache restored from key: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6614100Z ##[group]Run actions/cache@v5
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6614423Z with:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6614652Z   path: /home/runner/.pub-cache
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6615473Z   key: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6615943Z   enableCrossOsArchive: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6616469Z   fail-on-cache-miss: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6616729Z   lookup-only: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6616956Z   save-always: false
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6617165Z env:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6617365Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6617611Z   JAVA_VERSION: 17
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.6617829Z ##[endgroup]
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:38.8503591Z Cache hit for: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:39.7903954Z Received 154891924 of 154891924 (100.0%), 167.3 MBs/sec
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:39.7904627Z Cache Size: ~148 MB (154891924 B)
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:39.8001381Z [command]/usr/bin/tar -xf /home/runner/work/_temp/ce367c95-d96d-4037-b5c7-31551dff82f0/cache.tzst -P -C /home/runner/work/termux_forge/termux_forge --use-compress-program unzstd
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:40.9941207Z Cache restored successfully
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0091966Z Cache restored from key: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0229975Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0230394Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0230764Z ^[[36;1m  -n '3.32.8' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0231019Z ^[[36;1m  -a 'x64' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0231356Z ^[[36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.32.8-x64' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0231774Z ^[[36;1m  -d '/home/runner/.pub-cache' \^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0232075Z ^[[36;1m  stable^[[0m
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0267818Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0268197Z env:
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0268411Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0268673Z   JAVA_VERSION: 17
+Analyze & Lint	Setup Flutter	2026-06-20T12:45:41.0268906Z ##[endgroup]
+Analyze & Lint	Install dependencies	﻿2026-06-20T12:45:41.1818587Z ##[group]Run flutter pub get
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1818919Z ^[[36;1mflutter pub get^[[0m
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1856575Z shell: /usr/bin/bash -e {0}
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1856874Z env:
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1857117Z   FLUTTER_VERSION: 3.32.x
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1857381Z   JAVA_VERSION: 17
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1879850Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1880385Z   PUB_CACHE: /home/runner/.pub-cache
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.1880688Z ##[endgroup]
+Analyze & Lint	Install dependencies	2026-06-20T12:45:41.6075254Z Resolving dependencies...
+Analyze & Lint	Install dependencies	2026-06-20T12:45:43.4925011Z Downloading packages...
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0573407Z + _fe_analyzer_shared 61.0.0 (104.0.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0574029Z + _macros 0.3.3 from sdk dart
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0574471Z + analyzer 5.13.0 (14.0.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0574924Z + animations 2.1.1 (2.2.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0575364Z + archive 4.0.9
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0575706Z + args 2.7.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0576034Z + async 2.13.0 (2.13.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0576627Z + boolean_selector 2.1.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0577028Z + build 2.4.1 (4.0.6 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0577480Z + build_config 1.1.2 (1.3.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0577922Z + build_daemon 4.1.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0578317Z + build_resolvers 2.4.2 (3.0.4 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0578796Z + build_runner 2.4.13 (2.15.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0579470Z + build_runner_core 7.3.2 (9.3.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0579933Z + built_collection 5.1.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0580344Z + built_value 8.12.6
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0580698Z + characters 1.4.0 (1.4.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0580971Z + checked_yaml 2.0.4
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0581211Z + cli_util 0.4.2 (0.5.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0581469Z + clock 1.1.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0581683Z + code_builder 4.11.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0581911Z + collection 1.19.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0582190Z + convert 3.1.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0582408Z + cross_file 0.3.5+2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0582624Z + crypto 3.0.7
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0582872Z + cupertino_icons 1.0.8 (1.0.9 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0583161Z + dart_style 2.3.2 (3.1.9 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0584178Z + dartx 1.2.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0584485Z + dio 5.9.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0584810Z + dio_web_adapter 2.1.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0585163Z + equatable 2.0.8
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0585499Z + fake_async 1.3.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0585819Z + ffi 2.2.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0586103Z + file 7.0.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0586421Z + file_picker 8.3.7 (11.0.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0586827Z + fixnum 1.1.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0587144Z + fl_chart 0.70.2 (1.2.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0587558Z + flutter 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0587940Z + flutter_animate 4.5.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0588300Z + flutter_driver 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0588990Z + flutter_fancy_tree_view 1.6.0 (discontinued replaced by two_dimensional_scrollables)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0589882Z + flutter_launcher_icons 0.14.4
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0590265Z + flutter_lints 6.0.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0590812Z + flutter_markdown 0.7.7+1 (discontinued replaced by flutter_markdown_plus)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0591537Z + flutter_plugin_android_lifecycle 2.0.31 (2.0.35 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0592109Z + flutter_riverpod 2.2.0 (3.3.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0592604Z + flutter_secure_storage 9.2.4 (10.3.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0593154Z + flutter_secure_storage_linux 1.2.3 (3.0.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0593721Z + flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0594352Z + flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0594994Z + flutter_secure_storage_web 1.2.1 (2.1.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0595579Z + flutter_secure_storage_windows 3.1.2 (4.2.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0596084Z + flutter_shaders 0.1.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0596464Z + flutter_test 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0596920Z + flutter_vector_icons 2.0.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0597356Z + flutter_web_plugins 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0598211Z + freezed 3.0.0-0.0.dev (3.2.5 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0598666Z + freezed_annotation 3.1.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0599266Z + frontend_server_client 4.0.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0599744Z + fuchsia_remote_debug_protocol 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0600240Z + fuzzy 0.5.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0600552Z + glob 2.1.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0600880Z + go_router 14.8.1 (17.3.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0601328Z + google_fonts 6.3.2 (8.1.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0601750Z + graphs 2.3.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0602092Z + http 1.6.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0602478Z + http_multi_server 3.2.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0602849Z + http_parser 4.1.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0603213Z + image 4.8.0 (4.9.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0603614Z + integration_test 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0604041Z + intl 0.20.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0604357Z + io 1.0.5
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0604661Z + isar 3.1.0+1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0604996Z + isar_flutter_libs 3.1.0+1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0605405Z + isar_generator 3.1.0+1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0605797Z + isolate_contactor 4.1.0 (4.2.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0606155Z + isolate_manager 4.1.5+1 (6.3.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0606437Z + js 0.6.7 (0.7.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0606690Z + json_annotation 4.9.0 (4.12.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0606986Z + json_serializable 6.8.0 (6.14.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0607577Z + leak_tracker 10.0.9 (11.0.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0608068Z + leak_tracker_flutter_testing 3.0.9 (3.0.10 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0608613Z + leak_tracker_testing 3.0.1 (3.0.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0609262Z + lints 6.1.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0609587Z + logger 2.7.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0609826Z + logging 1.3.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0610037Z + macros 0.1.3-main.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0610267Z + markdown 7.3.0 (7.3.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0610542Z + matcher 0.12.17 (0.12.20 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0610844Z + material_color_utilities 0.11.1 (0.13.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0611163Z + meta 1.16.0 (1.18.3 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0611412Z + mime 2.0.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0611831Z + mockito 5.4.4 (5.7.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0612099Z + package_config 2.2.0 (3.0.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0612373Z + path 1.9.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0612583Z + path_provider 2.1.5 (2.1.6 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0612879Z + path_provider_android 2.2.19 (2.3.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0613220Z + path_provider_foundation 2.4.2 (2.6.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0613558Z + path_provider_linux 2.2.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0613863Z + path_provider_platform_interface 2.1.2 (2.1.3 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0614207Z + path_provider_windows 2.3.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0614493Z + permission_handler 11.4.0 (12.0.3 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0614851Z + permission_handler_android 12.1.0 (13.0.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0615186Z + permission_handler_apple 9.4.10
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0615468Z + permission_handler_html 0.1.3+5
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0615767Z + permission_handler_platform_interface 4.3.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0616081Z + permission_handler_windows 0.2.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0616353Z + petitparser 7.0.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0616585Z + platform 3.1.6
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0616812Z + plugin_platform_interface 2.1.8
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0617060Z + pool 1.5.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0617265Z + posix 6.5.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0617472Z + process 5.0.3 (5.0.5 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0617714Z + pub_semver 2.2.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0617941Z + pubspec_parse 1.5.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0618163Z + quiver 3.2.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0618366Z + re_editor 0.9.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0618588Z + re_highlight 0.0.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0618824Z + riverpod 2.2.0 (3.3.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0619363Z + riverpod_annotation 1.2.1 (4.0.3 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0619684Z + riverpod_generator 1.1.1 (4.0.4 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0619979Z + share_plus 10.1.4 (13.1.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0620299Z + share_plus_platform_interface 5.0.2 (7.1.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0620814Z + shared_preferences 2.5.3 (2.5.5 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0621144Z + shared_preferences_android 2.4.13 (2.4.26 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0621505Z + shared_preferences_foundation 2.5.4 (2.5.6 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0621834Z + shared_preferences_linux 2.4.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0622372Z + shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0622936Z + shared_preferences_web 2.4.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0623364Z + shared_preferences_windows 2.4.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0623781Z + shelf 1.4.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0624127Z + shelf_web_socket 2.0.1 (3.0.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0624580Z + sky_engine 0.0.0 from sdk flutter
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0624994Z + source_gen 1.5.0 (4.2.3 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0625433Z + source_helper 1.3.5 (1.3.12 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0625866Z + source_span 1.10.1 (1.10.2 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0626295Z + stack_trace 1.12.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0626679Z + state_notifier 0.7.2+1 (1.0.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0627142Z + stream_channel 2.1.4
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0627500Z + stream_transform 2.1.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0627890Z + string_scanner 1.4.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0628232Z + stringr 1.2.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0628562Z + sync_http 0.3.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0628909Z + term_glyph 1.2.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0629441Z + test_api 0.7.4 (0.7.12 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0629843Z + time 2.1.6
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0630161Z + timing 1.0.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0630484Z + typed_data 1.4.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0630830Z + url_launcher 6.3.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0631238Z + url_launcher_android 6.3.20 (6.3.32 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0631728Z + url_launcher_ios 6.3.4 (6.4.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0632172Z + url_launcher_linux 3.2.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0632591Z + url_launcher_macos 3.2.3 (3.2.5 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0633064Z + url_launcher_platform_interface 2.3.2
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0633524Z + url_launcher_web 2.4.1 (2.4.3 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0633986Z + url_launcher_windows 3.1.5
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0634380Z + uuid 4.5.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0634715Z + vector_math 2.1.4 (2.4.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0635408Z + vm_service 15.0.0 (15.2.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0635825Z + watcher 1.2.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0636144Z + web 1.1.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0636457Z + web_socket 1.0.1
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0636809Z + web_socket_channel 3.0.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0637185Z + webdriver 3.1.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0637540Z + win32 5.15.0 (6.3.0 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0637949Z + xdg_directories 1.1.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0638267Z + xml 6.6.1 (7.0.1 available)
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0638512Z + xterm 4.0.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0638712Z + xxh3 1.2.0
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0639163Z + yaml 3.1.3
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0639478Z + zmodem 0.0.6
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0639864Z Changed 171 dependencies!
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0640267Z 2 packages are discontinued.
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0640872Z 71 packages have newer versions incompatible with dependency constraints.
+Analyze & Lint	Install dependencies	2026-06-20T12:45:45.0641588Z Try `flutter pub outdated` for more information.
+Analyze & Lint	Post Setup Flutter	﻿2026-06-20T12:45:46.4563072Z Post job cleanup.
+Analyze & Lint	Post Setup Flutter	2026-06-20T12:45:46.5462087Z Post job cleanup.
+Analyze & Lint	Post Setup Flutter	2026-06-20T12:45:46.6764166Z Cache hit occurred on the primary key flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-, not saving cache.
+Analyze & Lint	Post Setup Flutter	2026-06-20T12:45:46.6869746Z Post job cleanup.
+Analyze & Lint	Post Setup Flutter	2026-06-20T12:45:46.8239801Z Cache hit occurred on the primary key flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1, not saving cache.
+Analyze & Lint	Post Checkout	﻿2026-06-20T12:45:46.8439637Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.8441780Z Post job cleanup.
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9301672Z [command]/usr/bin/git version
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9337894Z git version 2.54.0
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9374114Z Temporarily overriding HOME='/home/runner/work/_temp/0dcf8405-9ee3-4dee-b4a1-672671c65376' before making global git config changes
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9375827Z Adding repository directory to the temporary git global config as a safe directory
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9380452Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux_forge/termux_forge
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9417590Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9475617Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9711307Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9737981Z http.https://github.com/.extraheader
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9748361Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Analyze & Lint	Post Checkout	2026-06-20T12:45:46.9782248Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Analyze & Lint	Post Checkout	2026-06-20T12:45:47.0033055Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Analyze & Lint	Post Checkout	2026-06-20T12:45:47.0065087Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Analyze & Lint	Complete job	﻿2026-06-20T12:45:47.0432444Z Cleaning up orphan processes
+Analyze & Lint	Complete job	2026-06-20T12:45:47.0721167Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Unit & Widget Tests	Set up job	﻿2026-06-20T12:45:52.1513960Z Current runner version: '2.335.1'
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1541680Z ##[group]Runner Image Provisioner
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1542888Z Hosted Compute Agent
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1543514Z Version: 20260611.554
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1544245Z Commit: 5e0782fdc9014723d3be820dd114dd31555c2bd1
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1544965Z Build Date: 2026-06-11T21:40:46Z
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1545737Z Worker ID: {96bfde2c-9d88-496e-beb7-f05955756126}
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1546464Z Azure Region: northcentralus
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1547101Z ##[endgroup]
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1548638Z ##[group]Operating System
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1549339Z Ubuntu
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1549928Z 24.04.4
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1550469Z LTS
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1551019Z ##[endgroup]
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1551626Z ##[group]Runner Image
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1552508Z Image: ubuntu-24.04
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1553115Z Version: 20260615.205.1
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1554296Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260615.205/images/ubuntu/Ubuntu2404-Readme.md
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1556100Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260615.205
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1557063Z ##[endgroup]
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1558715Z ##[group]GITHUB_TOKEN Permissions
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1560865Z Contents: read
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1561482Z Metadata: read
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1562137Z Packages: read
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1563054Z ##[endgroup]
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1565200Z Secret source: Actions
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.1566244Z Prepare workflow directory
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.2120468Z Prepare all required actions
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.2176929Z Getting action download info
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.5464680Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.6524018Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+Unit & Widget Tests	Set up job	2026-06-20T12:45:52.8234299Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Unit & Widget Tests	Set up job	2026-06-20T12:45:53.0361058Z Getting action download info
+Unit & Widget Tests	Set up job	2026-06-20T12:45:53.1138579Z Download action repository 'actions/cache@v5' (SHA:27d5ce7f107fe9357f9df03efb73ab90386fccae)
+Unit & Widget Tests	Set up job	2026-06-20T12:45:53.2507733Z Complete job name: Unit & Widget Tests
+Unit & Widget Tests	Checkout	﻿2026-06-20T12:45:53.3258860Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3268151Z ##[group]Run actions/checkout@v4
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3269006Z with:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3269487Z   repository: shivaww/termux_forge
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3274361Z   token: ***
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3274854Z   ssh-strict: true
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3275333Z   ssh-user: git
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3275817Z   persist-credentials: true
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3276339Z   clean: true
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3276841Z   sparse-checkout-cone-mode: true
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3277430Z   fetch-depth: 1
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3277901Z   fetch-tags: false
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3278388Z   show-progress: true
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3278873Z   lfs: false
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3279333Z   submodules: false
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3279855Z   set-safe-directory: true
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3280659Z env:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3281134Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3281801Z   JAVA_VERSION: 17
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.3282658Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4303382Z Syncing repository: shivaww/termux_forge
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4305533Z ##[group]Getting Git version info
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4306403Z Working directory is '/home/runner/work/termux_forge/termux_forge'
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4307568Z [command]/usr/bin/git version
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4366739Z git version 2.54.0
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4420241Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4434430Z Temporarily overriding HOME='/home/runner/work/_temp/48250ede-8ed1-46ec-bbb8-6ff9c02776ea' before making global git config changes
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4439099Z Adding repository directory to the temporary git global config as a safe directory
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4441157Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux_forge/termux_forge
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4485692Z Deleting the contents of '/home/runner/work/termux_forge/termux_forge'
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4489523Z ##[group]Initializing the repository
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4494960Z [command]/usr/bin/git init /home/runner/work/termux_forge/termux_forge
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4592894Z hint: Using 'master' as the name for the initial branch. This default branch name
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4594816Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4596429Z hint: to use in all of your new repositories, which will suppress this warning,
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4598086Z hint: call:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4598838Z hint:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4599946Z hint: 	git config --global init.defaultBranch <name>
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4601326Z hint:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4602877Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4604933Z hint: 'development'. The just-created branch can be renamed via this command:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4606503Z hint:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4607372Z hint: 	git branch -m <name>
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4608377Z hint:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4609755Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4612076Z Initialized empty Git repository in /home/runner/work/termux_forge/termux_forge/.git/
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4615628Z [command]/usr/bin/git remote add origin https://github.com/shivaww/termux_forge
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4653625Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4655160Z ##[group]Disabling automatic garbage collection
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4657662Z [command]/usr/bin/git config --local gc.auto 0
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4687273Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4688850Z ##[group]Setting up auth
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4694899Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.4728899Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5067403Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5099354Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5317226Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5349354Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5565288Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5598173Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5606584Z ##[group]Fetching the repository
+Unit & Widget Tests	Checkout	2026-06-20T12:45:53.5608050Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f4cf3e5cb08af630075438f4d654880b288c01b4:refs/remotes/origin/main
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0033499Z From https://github.com/shivaww/termux_forge
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0036919Z  * [new ref]         f4cf3e5cb08af630075438f4d654880b288c01b4 -> origin/main
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0068768Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0070090Z ##[group]Determining the checkout info
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0071928Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0076491Z [command]/usr/bin/git sparse-checkout disable
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0192481Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0196762Z ##[group]Checking out the ref
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0198642Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0346283Z Switched to a new branch 'main'
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0350612Z branch 'main' set up to track 'origin/main'.
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0358055Z ##[endgroup]
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0403186Z [command]/usr/bin/git log -1 --format=%H
+Unit & Widget Tests	Checkout	2026-06-20T12:45:54.0426420Z f4cf3e5cb08af630075438f4d654880b288c01b4
+Unit & Widget Tests	Setup Flutter	﻿2026-06-20T12:45:54.1120700Z ##[group]Run subosito/flutter-action@v2
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1121977Z with:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1123198Z   flutter-version: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1124238Z   channel: stable
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1125143Z   cache: true
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1126029Z   architecture: X64
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1126984Z   pub-cache-path: default
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1128136Z   dry-run: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1129248Z   git-source: https://github.com/flutter/flutter.git
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1131381Z env:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1132543Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1133767Z   JAVA_VERSION: 17
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1134668Z ##[endgroup]
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1295717Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1297390Z ^[[36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1480697Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1482096Z env:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1483309Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1484311Z   JAVA_VERSION: 17
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1485239Z ##[endgroup]
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1670819Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1672480Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh -p \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1673769Z ^[[36;1m  -n '3.32.x' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1674747Z ^[[36;1m  -f '' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1675629Z ^[[36;1m  -a 'X64' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1676533Z ^[[36;1m  -k '' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1677417Z ^[[36;1m  -c '' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1678303Z ^[[36;1m  -l '' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1679206Z ^[[36;1m  -d 'default' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1680391Z ^[[36;1m  -g 'https://github.com/flutter/flutter.git' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1681736Z ^[[36;1m  stable^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1714880Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1716242Z env:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1717055Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1718033Z   JAVA_VERSION: 17
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.1718896Z ##[endgroup]
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3466247Z ##[group]Run actions/cache@v5
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3467375Z with:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3468384Z   path: /opt/hostedtoolcache/flutter/stable-3.32.8-x64
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3470199Z   key: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3471904Z   enableCrossOsArchive: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3473290Z   fail-on-cache-miss: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3474314Z   lookup-only: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3475239Z   save-always: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3476134Z env:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3476955Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3477923Z   JAVA_VERSION: 17
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.3478798Z ##[endgroup]
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:54.5757220Z Cache hit for: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:55.6815065Z Received 134217728 of 1567761209 (8.6%), 128.0 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:56.6813699Z Received 394264576 of 1567761209 (25.1%), 187.9 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:57.6854580Z Received 650117120 of 1567761209 (41.5%), 206.5 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:58.6863990Z Received 880803840 of 1567761209 (56.2%), 209.9 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:45:59.6815460Z Received 1149239296 of 1567761209 (73.3%), 219.1 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:00.6831980Z Received 1388314624 of 1567761209 (88.6%), 220.5 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:01.4870251Z Received 1567761209 of 1567761209 (100.0%), 219.6 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:01.4873558Z Cache Size: ~1495 MB (1567761209 B)
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:01.4921464Z [command]/usr/bin/tar -xf /home/runner/work/_temp/a4c11163-924f-4667-b06e-668eb4990dd8/cache.tzst -P -C /home/runner/work/termux_forge/termux_forge --use-compress-program unzstd
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:05.8540130Z Cache restored successfully
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:05.9320499Z Cache restored from key: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0395434Z ##[group]Run actions/cache@v5
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0395733Z with:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0395954Z   path: /home/runner/.pub-cache
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0396413Z   key: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0397185Z   enableCrossOsArchive: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0397462Z   fail-on-cache-miss: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0397715Z   lookup-only: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0397943Z   save-always: false
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0398160Z env:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0398364Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0398609Z   JAVA_VERSION: 17
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.0398828Z ##[endgroup]
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:06.2670005Z Cache hit for: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:07.3838654Z Received 134217728 of 154891924 (86.7%), 128.0 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:07.4721050Z Received 154891924 of 154891924 (100.0%), 135.8 MBs/sec
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:07.4724798Z Cache Size: ~148 MB (154891924 B)
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:07.4842006Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d016b17f-eeff-4071-ae72-7a5d85c21358/cache.tzst -P -C /home/runner/work/termux_forge/termux_forge --use-compress-program unzstd
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8001974Z Cache restored successfully
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8152773Z Cache restored from key: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8336660Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8337312Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8337844Z ^[[36;1m  -n '3.32.8' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8338302Z ^[[36;1m  -a 'x64' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8338903Z ^[[36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.32.8-x64' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8339630Z ^[[36;1m  -d '/home/runner/.pub-cache' \^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8340172Z ^[[36;1m  stable^[[0m
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8374807Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8375202Z env:
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8375436Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8375698Z   JAVA_VERSION: 17
+Unit & Widget Tests	Setup Flutter	2026-06-20T12:46:08.8375923Z ##[endgroup]
+Unit & Widget Tests	Install dependencies	﻿2026-06-20T12:46:09.0081926Z ##[group]Run flutter pub get
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0082610Z ^[[36;1mflutter pub get^[[0m
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0116587Z shell: /usr/bin/bash -e {0}
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0116872Z env:
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0117094Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0117355Z   JAVA_VERSION: 17
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0117702Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0118101Z   PUB_CACHE: /home/runner/.pub-cache
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.0118383Z ##[endgroup]
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:09.5192792Z Resolving dependencies...
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:11.6793015Z Downloading packages...
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5734251Z + _fe_analyzer_shared 61.0.0 (104.0.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5735129Z + _macros 0.3.3 from sdk dart
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5735661Z + analyzer 5.13.0 (14.0.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5736262Z + animations 2.1.1 (2.2.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5736764Z + archive 4.0.9
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5737158Z + args 2.7.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5737539Z + async 2.13.0 (2.13.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5738111Z + boolean_selector 2.1.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5738568Z + build 2.4.1 (4.0.6 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5739060Z + build_config 1.1.2 (1.3.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5739556Z + build_daemon 4.1.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5740000Z + build_resolvers 2.4.2 (3.0.4 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5740566Z + build_runner 2.4.13 (2.15.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5740963Z + build_runner_core 7.3.2 (9.3.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5741269Z + built_collection 5.1.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5741524Z + built_value 8.12.6
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5741766Z + characters 1.4.0 (1.4.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5742038Z + checked_yaml 2.0.4
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5743674Z + cli_util 0.4.2 (0.5.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5743969Z + clock 1.1.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5744191Z + code_builder 4.11.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5745158Z + collection 1.19.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5745383Z + convert 3.1.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5745599Z + cross_file 0.3.5+2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5745843Z + crypto 3.0.7
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5746089Z + cupertino_icons 1.0.8 (1.0.9 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5746408Z + dart_style 2.3.2 (3.1.9 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5746682Z + dartx 1.2.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5746887Z + dio 5.9.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5747090Z + dio_web_adapter 2.1.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5747330Z + equatable 2.0.8
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5747547Z + fake_async 1.3.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5747757Z + ffi 2.2.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5747955Z + file 7.0.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5748171Z + file_picker 8.3.7 (11.0.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5748442Z + fixnum 1.1.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5748699Z + fl_chart 0.70.2 (1.2.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5748979Z + flutter 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5749245Z + flutter_animate 4.5.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5749492Z + flutter_driver 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5749946Z + flutter_fancy_tree_view 1.6.0 (discontinued replaced by two_dimensional_scrollables)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5750403Z + flutter_launcher_icons 0.14.4
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5750667Z + flutter_lints 6.0.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5751032Z + flutter_markdown 0.7.7+1 (discontinued replaced by flutter_markdown_plus)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5751907Z + flutter_plugin_android_lifecycle 2.0.31 (2.0.35 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5752559Z + flutter_riverpod 2.2.0 (3.3.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5752897Z + flutter_secure_storage 9.2.4 (10.3.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5753248Z + flutter_secure_storage_linux 1.2.3 (3.0.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5753597Z + flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5754001Z + flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5754398Z + flutter_secure_storage_web 1.2.1 (2.1.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5754760Z + flutter_secure_storage_windows 3.1.2 (4.2.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5755082Z + flutter_shaders 0.1.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5755337Z + flutter_test 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5755630Z + flutter_vector_icons 2.0.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5755905Z + flutter_web_plugins 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5756446Z + freezed 3.0.0-0.0.dev (3.2.5 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5756739Z + freezed_annotation 3.1.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5756992Z + frontend_server_client 4.0.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5757290Z + fuchsia_remote_debug_protocol 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5757604Z + fuzzy 0.5.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5757807Z + glob 2.1.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5758220Z + go_router 14.8.1 (17.3.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5758579Z + google_fonts 6.3.2 (8.1.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5758857Z + graphs 2.3.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5759198Z + http 1.6.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5759438Z + http_multi_server 3.2.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5759678Z + http_parser 4.1.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5759911Z + image 4.8.0 (4.9.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5760182Z + integration_test 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5760467Z + intl 0.20.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5760676Z + io 1.0.5
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5760870Z + isar 3.1.0+1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5761085Z + isar_flutter_libs 3.1.0+1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5761355Z + isar_generator 3.1.0+1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5761611Z + isolate_contactor 4.1.0 (4.2.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5761911Z + isolate_manager 4.1.5+1 (6.3.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5762525Z + js 0.6.7 (0.7.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5762970Z + json_annotation 4.9.0 (4.12.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5763410Z + json_serializable 6.8.0 (6.14.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5763739Z + leak_tracker 10.0.9 (11.0.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5764064Z + leak_tracker_flutter_testing 3.0.9 (3.0.10 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5764412Z + leak_tracker_testing 3.0.1 (3.0.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5764707Z + lints 6.1.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5764915Z + logger 2.7.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5765119Z + logging 1.3.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5765344Z + macros 0.1.3-main.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5765831Z + markdown 7.3.0 (7.3.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5766106Z + matcher 0.12.17 (0.12.20 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5766617Z + material_color_utilities 0.11.1 (0.13.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5767019Z + meta 1.16.0 (1.18.3 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5767279Z + mime 2.0.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5767493Z + mockito 5.4.4 (5.7.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5767762Z + package_config 2.2.0 (3.0.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5768039Z + path 1.9.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5768258Z + path_provider 2.1.5 (2.1.6 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5768571Z + path_provider_android 2.2.19 (2.3.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5768912Z + path_provider_foundation 2.4.2 (2.6.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5769230Z + path_provider_linux 2.2.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5769537Z + path_provider_platform_interface 2.1.2 (2.1.3 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5769885Z + path_provider_windows 2.3.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5770171Z + permission_handler 11.4.0 (12.0.3 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5770517Z + permission_handler_android 12.1.0 (13.0.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5770859Z + permission_handler_apple 9.4.10
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5771136Z + permission_handler_html 0.1.3+5
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5771427Z + permission_handler_platform_interface 4.3.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5771750Z + permission_handler_windows 0.2.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5772020Z + petitparser 7.0.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5772416Z + platform 3.1.6
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5772655Z + plugin_platform_interface 2.1.8
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5772918Z + pool 1.5.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5773121Z + posix 6.5.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5773344Z + process 5.0.3 (5.0.5 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5773600Z + pub_semver 2.2.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5773827Z + pubspec_parse 1.5.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5774058Z + quiver 3.2.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5774274Z + re_editor 0.9.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5774494Z + re_highlight 0.0.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5774740Z + riverpod 2.2.0 (3.3.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5775034Z + riverpod_annotation 1.2.1 (4.0.3 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5775354Z + riverpod_generator 1.1.1 (4.0.4 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5775956Z + share_plus 10.1.4 (13.1.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5776581Z + share_plus_platform_interface 5.0.2 (7.1.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5777525Z + shared_preferences 2.5.3 (2.5.5 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5778197Z + shared_preferences_android 2.4.13 (2.4.26 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5778889Z + shared_preferences_foundation 2.5.4 (2.5.6 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5779499Z + shared_preferences_linux 2.4.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5780144Z + shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5780834Z + shared_preferences_web 2.4.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5781363Z + shared_preferences_windows 2.4.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5781889Z + shelf 1.4.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5782583Z + shelf_web_socket 2.0.1 (3.0.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5783147Z + sky_engine 0.0.0 from sdk flutter
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5783658Z + source_gen 1.5.0 (4.2.3 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5784175Z + source_helper 1.3.5 (1.3.12 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5784715Z + source_span 1.10.1 (1.10.2 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5785207Z + stack_trace 1.12.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5785642Z + state_notifier 0.7.2+1 (1.0.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5786173Z + stream_channel 2.1.4
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5786602Z + stream_transform 2.1.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5787039Z + string_scanner 1.4.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5787460Z + stringr 1.2.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5787846Z + sync_http 0.3.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5788240Z + term_glyph 1.2.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5788652Z + test_api 0.7.4 (0.7.12 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5789152Z + time 2.1.6
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5789555Z + timing 1.0.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5789956Z + typed_data 1.4.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5790359Z + url_launcher 6.3.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5790842Z + url_launcher_android 6.3.20 (6.3.32 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5791234Z + url_launcher_ios 6.3.4 (6.4.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5791540Z + url_launcher_linux 3.2.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5791811Z + url_launcher_macos 3.2.3 (3.2.5 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5792528Z + url_launcher_platform_interface 2.3.2
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5792872Z + url_launcher_web 2.4.1 (2.4.3 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5793311Z + url_launcher_windows 3.1.5
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5793776Z + uuid 4.5.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5794165Z + vector_math 2.1.4 (2.4.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5794660Z + vm_service 15.0.0 (15.2.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5795189Z + watcher 1.2.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5795547Z + web 1.1.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5795892Z + web_socket 1.0.1
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5796302Z + web_socket_channel 3.0.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5796741Z + webdriver 3.1.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5797144Z + win32 5.15.0 (6.3.0 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5797622Z + xdg_directories 1.1.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5798117Z + xml 6.6.1 (7.0.1 available)
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5798553Z + xterm 4.0.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5798919Z + xxh3 1.2.0
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5799293Z + yaml 3.1.3
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5799680Z + zmodem 0.0.6
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5800112Z Changed 171 dependencies!
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5800603Z 2 packages are discontinued.
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5801301Z 71 packages have newer versions incompatible with dependency constraints.
+Unit & Widget Tests	Install dependencies	2026-06-20T12:46:13.5802134Z Try `flutter pub outdated` for more information.
+Unit & Widget Tests	Run tests with coverage	﻿2026-06-20T12:46:14.8452665Z ##[group]Run flutter test --coverage --reporter=expanded
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8453184Z ^[[36;1mflutter test --coverage --reporter=expanded^[[0m
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8484422Z shell: /usr/bin/bash -e {0}
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8484705Z env:
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8484928Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8485190Z   JAVA_VERSION: 17
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8485550Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8485973Z   PUB_CACHE: /home/runner/.pub-cache
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:14.8486255Z ##[endgroup]
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:16.9626376Z 00:00 +0: loading /home/runner/work/termux_forge/termux_forge/test/dummy_test.dart
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:24.9859560Z 00:00 +0: dummy test to pass CI
+Unit & Widget Tests	Run tests with coverage	2026-06-20T12:46:25.4727786Z 00:00 +1: All tests passed!
+Unit & Widget Tests	Upload coverage	﻿2026-06-20T12:46:25.5465555Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5466919Z ##[group]Run actions/upload-artifact@v4
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5467210Z with:
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5467435Z   name: coverage-report
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5467690Z   path: coverage/lcov.info
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5467940Z   retention-days: 7
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5468182Z   if-no-files-found: warn
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5468434Z   compression-level: 6
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5468669Z   overwrite: false
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5468912Z   include-hidden-files: false
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5469166Z env:
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5469371Z   FLUTTER_VERSION: 3.32.x
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5469624Z   JAVA_VERSION: 17
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5469955Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5470402Z   PUB_CACHE: /home/runner/.pub-cache
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.5470679Z ##[endgroup]
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.7100828Z (node:2699) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.7102642Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.7145941Z With the provided path, there will be 1 file uploaded
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.7151399Z Artifact name is valid!
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.7152536Z Root directory input is valid!
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.9411930Z Beginning upload of artifact content to blob storage
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:25.9591657Z (node:2699) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.0623707Z Uploaded bytes 134
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.0980731Z Finished uploading artifact content to blob storage!
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.0982799Z SHA256 digest of uploaded artifact zip is bd830392203571a8bff33436ea74cc92c9bfdbdc4727a02cc28978740142873d
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.0984062Z Finalizing artifact upload
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.3401734Z Artifact coverage-report.zip successfully finalized. Artifact ID 7765413801
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.3402889Z Artifact coverage-report has been successfully uploaded! Final size is 134 bytes. Artifact ID is 7765413801
+Unit & Widget Tests	Upload coverage	2026-06-20T12:46:26.3408901Z Artifact download URL: https://github.com/shivaww/termux_forge/actions/runs/27871579171/artifacts/7765413801
+Unit & Widget Tests	Post Setup Flutter	﻿2026-06-20T12:46:26.3663448Z Post job cleanup.
+Unit & Widget Tests	Post Setup Flutter	2026-06-20T12:46:26.4604457Z Post job cleanup.
+Unit & Widget Tests	Post Setup Flutter	2026-06-20T12:46:26.5908904Z Cache hit occurred on the primary key flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-, not saving cache.
+Unit & Widget Tests	Post Setup Flutter	2026-06-20T12:46:26.6012992Z Post job cleanup.
+Unit & Widget Tests	Post Setup Flutter	2026-06-20T12:46:26.7370809Z Cache hit occurred on the primary key flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1, not saving cache.
+Unit & Widget Tests	Post Checkout	﻿2026-06-20T12:46:26.7505272Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.7506594Z Post job cleanup.
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8347142Z [command]/usr/bin/git version
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8416858Z git version 2.54.0
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8457410Z Temporarily overriding HOME='/home/runner/work/_temp/a36a2505-f34d-45ed-aff8-fbb1606f2ca1' before making global git config changes
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8458982Z Adding repository directory to the temporary git global config as a safe directory
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8464441Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux_forge/termux_forge
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8501301Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8535909Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8760321Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8787150Z http.https://github.com/.extraheader
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8798592Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.8828992Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.9049888Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Unit & Widget Tests	Post Checkout	2026-06-20T12:46:26.9080079Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Unit & Widget Tests	Complete job	﻿2026-06-20T12:46:26.9438478Z Cleaning up orphan processes
+Unit & Widget Tests	Complete job	2026-06-20T12:46:26.9715768Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build APK	Set up job	﻿2026-06-20T12:46:31.3680608Z Current runner version: '2.335.1'
+Build APK	Set up job	2026-06-20T12:46:31.3703005Z ##[group]Runner Image Provisioner
+Build APK	Set up job	2026-06-20T12:46:31.3703748Z Hosted Compute Agent
+Build APK	Set up job	2026-06-20T12:46:31.3704300Z Version: 20260611.554
+Build APK	Set up job	2026-06-20T12:46:31.3704823Z Commit: 5e0782fdc9014723d3be820dd114dd31555c2bd1
+Build APK	Set up job	2026-06-20T12:46:31.3705424Z Build Date: 2026-06-11T21:40:46Z
+Build APK	Set up job	2026-06-20T12:46:31.3706030Z Worker ID: {59dd84a1-9d5c-4377-a9be-51e9a431c9a3}
+Build APK	Set up job	2026-06-20T12:46:31.3706622Z Azure Region: westcentralus
+Build APK	Set up job	2026-06-20T12:46:31.3707146Z ##[endgroup]
+Build APK	Set up job	2026-06-20T12:46:31.3708229Z ##[group]Operating System
+Build APK	Set up job	2026-06-20T12:46:31.3708765Z Ubuntu
+Build APK	Set up job	2026-06-20T12:46:31.3709251Z 24.04.4
+Build APK	Set up job	2026-06-20T12:46:31.3709682Z LTS
+Build APK	Set up job	2026-06-20T12:46:31.3710089Z ##[endgroup]
+Build APK	Set up job	2026-06-20T12:46:31.3710623Z ##[group]Runner Image
+Build APK	Set up job	2026-06-20T12:46:31.3711329Z Image: ubuntu-24.04
+Build APK	Set up job	2026-06-20T12:46:31.3712136Z Version: 20260615.205.1
+Build APK	Set up job	2026-06-20T12:46:31.3712991Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260615.205/images/ubuntu/Ubuntu2404-Readme.md
+Build APK	Set up job	2026-06-20T12:46:31.3714404Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260615.205
+Build APK	Set up job	2026-06-20T12:46:31.3715203Z ##[endgroup]
+Build APK	Set up job	2026-06-20T12:46:31.3716220Z ##[group]GITHUB_TOKEN Permissions
+Build APK	Set up job	2026-06-20T12:46:31.3717927Z Contents: read
+Build APK	Set up job	2026-06-20T12:46:31.3718519Z Metadata: read
+Build APK	Set up job	2026-06-20T12:46:31.3719008Z Packages: read
+Build APK	Set up job	2026-06-20T12:46:31.3719440Z ##[endgroup]
+Build APK	Set up job	2026-06-20T12:46:31.3721392Z Secret source: Actions
+Build APK	Set up job	2026-06-20T12:46:31.3721997Z Prepare workflow directory
+Build APK	Set up job	2026-06-20T12:46:31.4089170Z Prepare all required actions
+Build APK	Set up job	2026-06-20T12:46:31.4133004Z Getting action download info
+Build APK	Set up job	2026-06-20T12:46:31.7797931Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build APK	Set up job	2026-06-20T12:46:31.8567718Z Download action repository 'actions/setup-java@v4' (SHA:c1e323688fd81a25caa38c78aa6df2d33d3e20d9)
+Build APK	Set up job	2026-06-20T12:46:32.6516857Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+Build APK	Set up job	2026-06-20T12:46:32.9916868Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Build APK	Set up job	2026-06-20T12:46:33.2863216Z Getting action download info
+Build APK	Set up job	2026-06-20T12:46:33.3853477Z Download action repository 'actions/cache@v5' (SHA:27d5ce7f107fe9357f9df03efb73ab90386fccae)
+Build APK	Set up job	2026-06-20T12:46:33.5937307Z Complete job name: Build APK
+Build APK	Checkout	﻿2026-06-20T12:46:33.6615021Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build APK	Checkout	2026-06-20T12:46:33.6623679Z ##[group]Run actions/checkout@v4
+Build APK	Checkout	2026-06-20T12:46:33.6624618Z with:
+Build APK	Checkout	2026-06-20T12:46:33.6625294Z   repository: shivaww/termux_forge
+Build APK	Checkout	2026-06-20T12:46:33.6633221Z   token: ***
+Build APK	Checkout	2026-06-20T12:46:33.6633910Z   ssh-strict: true
+Build APK	Checkout	2026-06-20T12:46:33.6634581Z   ssh-user: git
+Build APK	Checkout	2026-06-20T12:46:33.6635304Z   persist-credentials: true
+Build APK	Checkout	2026-06-20T12:46:33.6693401Z   clean: true
+Build APK	Checkout	2026-06-20T12:46:33.6694566Z   sparse-checkout-cone-mode: true
+Build APK	Checkout	2026-06-20T12:46:33.6695692Z   fetch-depth: 1
+Build APK	Checkout	2026-06-20T12:46:33.6696387Z   fetch-tags: false
+Build APK	Checkout	2026-06-20T12:46:33.6697074Z   show-progress: true
+Build APK	Checkout	2026-06-20T12:46:33.6697754Z   lfs: false
+Build APK	Checkout	2026-06-20T12:46:33.6698377Z   submodules: false
+Build APK	Checkout	2026-06-20T12:46:33.6699113Z   set-safe-directory: true
+Build APK	Checkout	2026-06-20T12:46:33.6700355Z env:
+Build APK	Checkout	2026-06-20T12:46:33.6701265Z   FLUTTER_VERSION: 3.32.x
+Build APK	Checkout	2026-06-20T12:46:33.6702016Z   JAVA_VERSION: 17
+Build APK	Checkout	2026-06-20T12:46:33.6702678Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:33.7537584Z Syncing repository: shivaww/termux_forge
+Build APK	Checkout	2026-06-20T12:46:33.7539689Z ##[group]Getting Git version info
+Build APK	Checkout	2026-06-20T12:46:33.7540811Z Working directory is '/home/runner/work/termux_forge/termux_forge'
+Build APK	Checkout	2026-06-20T12:46:33.7542643Z [command]/usr/bin/git version
+Build APK	Checkout	2026-06-20T12:46:33.7556125Z git version 2.54.0
+Build APK	Checkout	2026-06-20T12:46:33.7571942Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:33.7583192Z Temporarily overriding HOME='/home/runner/work/_temp/569b8e2b-4665-4e4d-9e48-9fcd7f84dff3' before making global git config changes
+Build APK	Checkout	2026-06-20T12:46:33.7586701Z Adding repository directory to the temporary git global config as a safe directory
+Build APK	Checkout	2026-06-20T12:46:33.7588424Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux_forge/termux_forge
+Build APK	Checkout	2026-06-20T12:46:33.7613367Z Deleting the contents of '/home/runner/work/termux_forge/termux_forge'
+Build APK	Checkout	2026-06-20T12:46:33.7616387Z ##[group]Initializing the repository
+Build APK	Checkout	2026-06-20T12:46:33.7619956Z [command]/usr/bin/git init /home/runner/work/termux_forge/termux_forge
+Build APK	Checkout	2026-06-20T12:46:33.7688109Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build APK	Checkout	2026-06-20T12:46:33.7690760Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build APK	Checkout	2026-06-20T12:46:33.7692794Z hint: to use in all of your new repositories, which will suppress this warning,
+Build APK	Checkout	2026-06-20T12:46:33.7694301Z hint: call:
+Build APK	Checkout	2026-06-20T12:46:33.7694974Z hint:
+Build APK	Checkout	2026-06-20T12:46:33.7695879Z hint: 	git config --global init.defaultBranch <name>
+Build APK	Checkout	2026-06-20T12:46:33.7697075Z hint:
+Build APK	Checkout	2026-06-20T12:46:33.7698111Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build APK	Checkout	2026-06-20T12:46:33.7699519Z hint: 'development'. The just-created branch can be renamed via this command:
+Build APK	Checkout	2026-06-20T12:46:33.7700655Z hint:
+Build APK	Checkout	2026-06-20T12:46:33.7701605Z hint: 	git branch -m <name>
+Build APK	Checkout	2026-06-20T12:46:33.7702335Z hint:
+Build APK	Checkout	2026-06-20T12:46:33.7703291Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build APK	Checkout	2026-06-20T12:46:33.7704834Z Initialized empty Git repository in /home/runner/work/termux_forge/termux_forge/.git/
+Build APK	Checkout	2026-06-20T12:46:33.7707341Z [command]/usr/bin/git remote add origin https://github.com/shivaww/termux_forge
+Build APK	Checkout	2026-06-20T12:46:33.7723312Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:33.7724562Z ##[group]Disabling automatic garbage collection
+Build APK	Checkout	2026-06-20T12:46:33.7725861Z [command]/usr/bin/git config --local gc.auto 0
+Build APK	Checkout	2026-06-20T12:46:33.7749245Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:33.7754206Z ##[group]Setting up auth
+Build APK	Checkout	2026-06-20T12:46:33.7755316Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build APK	Checkout	2026-06-20T12:46:33.7779058Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build APK	Checkout	2026-06-20T12:46:33.8023407Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build APK	Checkout	2026-06-20T12:46:33.8048116Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build APK	Checkout	2026-06-20T12:46:33.8227981Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build APK	Checkout	2026-06-20T12:46:33.8252125Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build APK	Checkout	2026-06-20T12:46:33.8432542Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build APK	Checkout	2026-06-20T12:46:33.8459440Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:33.8460612Z ##[group]Fetching the repository
+Build APK	Checkout	2026-06-20T12:46:33.8466511Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f4cf3e5cb08af630075438f4d654880b288c01b4:refs/remotes/origin/main
+Build APK	Checkout	2026-06-20T12:46:34.5693562Z From https://github.com/shivaww/termux_forge
+Build APK	Checkout	2026-06-20T12:46:34.5694939Z  * [new ref]         f4cf3e5cb08af630075438f4d654880b288c01b4 -> origin/main
+Build APK	Checkout	2026-06-20T12:46:34.5713707Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:34.5714886Z ##[group]Determining the checkout info
+Build APK	Checkout	2026-06-20T12:46:34.5716178Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:34.5720786Z [command]/usr/bin/git sparse-checkout disable
+Build APK	Checkout	2026-06-20T12:46:34.5750615Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Build APK	Checkout	2026-06-20T12:46:34.5772585Z ##[group]Checking out the ref
+Build APK	Checkout	2026-06-20T12:46:34.5775139Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Build APK	Checkout	2026-06-20T12:46:34.5926887Z Switched to a new branch 'main'
+Build APK	Checkout	2026-06-20T12:46:34.5927894Z branch 'main' set up to track 'origin/main'.
+Build APK	Checkout	2026-06-20T12:46:34.5930478Z ##[endgroup]
+Build APK	Checkout	2026-06-20T12:46:34.5956278Z [command]/usr/bin/git log -1 --format=%H
+Build APK	Checkout	2026-06-20T12:46:34.5974824Z f4cf3e5cb08af630075438f4d654880b288c01b4
+Build APK	Setup Java	﻿2026-06-20T12:46:34.6251943Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build APK	Setup Java	2026-06-20T12:46:34.6255516Z ##[group]Run actions/setup-java@v4
+Build APK	Setup Java	2026-06-20T12:46:34.6256232Z with:
+Build APK	Setup Java	2026-06-20T12:46:34.6256803Z   distribution: temurin
+Build APK	Setup Java	2026-06-20T12:46:34.6257441Z   java-version: 17
+Build APK	Setup Java	2026-06-20T12:46:34.6258050Z   java-package: jdk
+Build APK	Setup Java	2026-06-20T12:46:34.6258678Z   check-latest: false
+Build APK	Setup Java	2026-06-20T12:46:34.6259312Z   server-id: github
+Build APK	Setup Java	2026-06-20T12:46:34.6259965Z   server-username: GITHUB_ACTOR
+Build APK	Setup Java	2026-06-20T12:46:34.6260689Z   server-password: GITHUB_TOKEN
+Build APK	Setup Java	2026-06-20T12:46:34.6261547Z   overwrite-settings: true
+Build APK	Setup Java	2026-06-20T12:46:34.6262228Z   job-status: success
+Build APK	Setup Java	2026-06-20T12:46:34.6269841Z   token: ***
+Build APK	Setup Java	2026-06-20T12:46:34.6270403Z env:
+Build APK	Setup Java	2026-06-20T12:46:34.6271030Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Java	2026-06-20T12:46:34.6271734Z   JAVA_VERSION: 17
+Build APK	Setup Java	2026-06-20T12:46:34.6272328Z ##[endgroup]
+Build APK	Setup Java	2026-06-20T12:46:34.7533256Z ##[group]Installed distributions
+Build APK	Setup Java	2026-06-20T12:46:34.7585589Z Resolved Java 17.0.19+10 from tool-cache
+Build APK	Setup Java	2026-06-20T12:46:34.7586877Z Setting Java 17.0.19+10 as the default
+Build APK	Setup Java	2026-06-20T12:46:34.7594516Z (node:2079) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build APK	Setup Java	2026-06-20T12:46:34.7597074Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build APK	Setup Java	2026-06-20T12:46:34.7598848Z Creating toolchains.xml for JDK version 17 from temurin
+Build APK	Setup Java	2026-06-20T12:46:34.7651552Z Writing to /home/runner/.m2/toolchains.xml
+Build APK	Setup Java	2026-06-20T12:46:34.7652395Z 
+Build APK	Setup Java	2026-06-20T12:46:34.7652750Z Java configuration:
+Build APK	Setup Java	2026-06-20T12:46:34.7653667Z   Distribution: temurin
+Build APK	Setup Java	2026-06-20T12:46:34.7654567Z   Version: 17.0.19+10
+Build APK	Setup Java	2026-06-20T12:46:34.7655786Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Java	2026-06-20T12:46:34.7656873Z 
+Build APK	Setup Java	2026-06-20T12:46:34.7657848Z ##[endgroup]
+Build APK	Setup Java	2026-06-20T12:46:34.7671483Z Creating settings.xml with server-id: github
+Build APK	Setup Java	2026-06-20T12:46:34.7672490Z Writing to /home/runner/.m2/settings.xml
+Build APK	Setup Flutter	﻿2026-06-20T12:46:34.8021771Z ##[group]Run subosito/flutter-action@v2
+Build APK	Setup Flutter	2026-06-20T12:46:34.8022564Z with:
+Build APK	Setup Flutter	2026-06-20T12:46:34.8023128Z   flutter-version: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:34.8023772Z   channel: stable
+Build APK	Setup Flutter	2026-06-20T12:46:34.8024340Z   cache: true
+Build APK	Setup Flutter	2026-06-20T12:46:34.8024910Z   architecture: X64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8025526Z   pub-cache-path: default
+Build APK	Setup Flutter	2026-06-20T12:46:34.8026169Z   dry-run: false
+Build APK	Setup Flutter	2026-06-20T12:46:34.8026886Z   git-source: https://github.com/flutter/flutter.git
+Build APK	Setup Flutter	2026-06-20T12:46:34.8027708Z env:
+Build APK	Setup Flutter	2026-06-20T12:46:34.8028253Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:34.8028898Z   JAVA_VERSION: 17
+Build APK	Setup Flutter	2026-06-20T12:46:34.8029737Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8031177Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8032194Z ##[endgroup]
+Build APK	Setup Flutter	2026-06-20T12:46:34.8134820Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+Build APK	Setup Flutter	2026-06-20T12:46:34.8135841Z ^[[36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8293200Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build APK	Setup Flutter	2026-06-20T12:46:34.8294119Z env:
+Build APK	Setup Flutter	2026-06-20T12:46:34.8294675Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:34.8295322Z   JAVA_VERSION: 17
+Build APK	Setup Flutter	2026-06-20T12:46:34.8296167Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8297453Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8298664Z ##[endgroup]
+Build APK	Setup Flutter	2026-06-20T12:46:34.8434135Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+Build APK	Setup Flutter	2026-06-20T12:46:34.8435064Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh -p \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8435852Z ^[[36;1m  -n '3.32.x' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8436478Z ^[[36;1m  -f '' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8437064Z ^[[36;1m  -a 'X64' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8437664Z ^[[36;1m  -k '' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8438241Z ^[[36;1m  -c '' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8438818Z ^[[36;1m  -l '' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8439405Z ^[[36;1m  -d 'default' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8440334Z ^[[36;1m  -g 'https://github.com/flutter/flutter.git' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8441367Z ^[[36;1m  stable^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:34.8468213Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build APK	Setup Flutter	2026-06-20T12:46:34.8469093Z env:
+Build APK	Setup Flutter	2026-06-20T12:46:34.8469636Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:34.8470280Z   JAVA_VERSION: 17
+Build APK	Setup Flutter	2026-06-20T12:46:34.8471551Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8472872Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:34.8473898Z ##[endgroup]
+Build APK	Setup Flutter	2026-06-20T12:46:35.0448911Z ##[group]Run actions/cache@v5
+Build APK	Setup Flutter	2026-06-20T12:46:35.0449687Z with:
+Build APK	Setup Flutter	2026-06-20T12:46:35.0450358Z   path: /opt/hostedtoolcache/flutter/stable-3.32.8-x64
+Build APK	Setup Flutter	2026-06-20T12:46:35.0451777Z   key: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Build APK	Setup Flutter	2026-06-20T12:46:35.0452902Z   enableCrossOsArchive: false
+Build APK	Setup Flutter	2026-06-20T12:46:35.0453612Z   fail-on-cache-miss: false
+Build APK	Setup Flutter	2026-06-20T12:46:35.0454269Z   lookup-only: false
+Build APK	Setup Flutter	2026-06-20T12:46:35.0454893Z   save-always: false
+Build APK	Setup Flutter	2026-06-20T12:46:35.0455473Z env:
+Build APK	Setup Flutter	2026-06-20T12:46:35.0456009Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:35.0456647Z   JAVA_VERSION: 17
+Build APK	Setup Flutter	2026-06-20T12:46:35.0457483Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:35.0458764Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:35.0459799Z ##[endgroup]
+Build APK	Setup Flutter	2026-06-20T12:46:35.3736507Z Cache hit for: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Build APK	Setup Flutter	2026-06-20T12:46:36.6095849Z Received 37748736 of 1567761209 (2.4%), 36.0 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:37.6072800Z Received 218103808 of 1567761209 (13.9%), 103.9 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:38.6105216Z Received 398458880 of 1567761209 (25.4%), 126.6 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:39.6112286Z Received 570425344 of 1567761209 (36.4%), 135.9 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:40.6076459Z Received 666894336 of 1567761209 (42.5%), 127.1 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:41.6121326Z Received 805306368 of 1567761209 (51.4%), 127.9 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:42.6132177Z Received 952107008 of 1567761209 (60.7%), 129.6 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:43.6114111Z Received 1157627904 of 1567761209 (73.8%), 137.9 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:44.6118998Z Received 1342177280 of 1567761209 (85.6%), 142.1 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:45.6121172Z Received 1505755136 of 1567761209 (96.0%), 143.5 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:45.9671302Z Received 1567761209 of 1567761209 (100.0%), 144.3 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:45.9673341Z Cache Size: ~1495 MB (1567761209 B)
+Build APK	Setup Flutter	2026-06-20T12:46:45.9728649Z [command]/usr/bin/tar -xf /home/runner/work/_temp/72d04007-721d-4b38-addd-eb29275f627d/cache.tzst -P -C /home/runner/work/termux_forge/termux_forge --use-compress-program unzstd
+Build APK	Setup Flutter	2026-06-20T12:46:54.2606129Z Cache restored successfully
+Build APK	Setup Flutter	2026-06-20T12:46:54.3260790Z Cache restored from key: flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1
+Build APK	Setup Flutter	2026-06-20T12:46:54.4043899Z ##[group]Run actions/cache@v5
+Build APK	Setup Flutter	2026-06-20T12:46:54.4044154Z with:
+Build APK	Setup Flutter	2026-06-20T12:46:54.4044382Z   path: /home/runner/.pub-cache
+Build APK	Setup Flutter	2026-06-20T12:46:54.4044737Z   key: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Build APK	Setup Flutter	2026-06-20T12:46:54.4045107Z   enableCrossOsArchive: false
+Build APK	Setup Flutter	2026-06-20T12:46:54.4045333Z   fail-on-cache-miss: false
+Build APK	Setup Flutter	2026-06-20T12:46:54.4045543Z   lookup-only: false
+Build APK	Setup Flutter	2026-06-20T12:46:54.4045926Z   save-always: false
+Build APK	Setup Flutter	2026-06-20T12:46:54.4046102Z env:
+Build APK	Setup Flutter	2026-06-20T12:46:54.4046275Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:54.4046482Z   JAVA_VERSION: 17
+Build APK	Setup Flutter	2026-06-20T12:46:54.4046749Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:54.4047147Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:54.4047454Z ##[endgroup]
+Build APK	Setup Flutter	2026-06-20T12:46:54.6755670Z Cache hit for: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Build APK	Setup Flutter	2026-06-20T12:46:55.8930203Z Received 33554432 of 154891924 (21.7%), 32.0 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:56.8934057Z Received 150697620 of 154891924 (97.3%), 71.8 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:57.2108213Z Received 154891924 of 154891924 (100.0%), 63.7 MBs/sec
+Build APK	Setup Flutter	2026-06-20T12:46:57.2110408Z Cache Size: ~148 MB (154891924 B)
+Build APK	Setup Flutter	2026-06-20T12:46:57.2195919Z [command]/usr/bin/tar -xf /home/runner/work/_temp/371c4ccb-7f8f-412e-bdc2-b963aed8a9e8/cache.tzst -P -C /home/runner/work/termux_forge/termux_forge --use-compress-program unzstd
+Build APK	Setup Flutter	2026-06-20T12:46:58.2546354Z Cache restored successfully
+Build APK	Setup Flutter	2026-06-20T12:46:58.2674378Z Cache restored from key: flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-
+Build APK	Setup Flutter	2026-06-20T12:46:58.3342176Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+Build APK	Setup Flutter	2026-06-20T12:46:58.3342499Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:58.3342754Z ^[[36;1m  -n '3.32.8' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:58.3342968Z ^[[36;1m  -a 'x64' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:58.3343252Z ^[[36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.32.8-x64' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:58.3343563Z ^[[36;1m  -d '/home/runner/.pub-cache' \^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:58.3343817Z ^[[36;1m  stable^[[0m
+Build APK	Setup Flutter	2026-06-20T12:46:58.3370695Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build APK	Setup Flutter	2026-06-20T12:46:58.3371165Z env:
+Build APK	Setup Flutter	2026-06-20T12:46:58.3371348Z   FLUTTER_VERSION: 3.32.x
+Build APK	Setup Flutter	2026-06-20T12:46:58.3371573Z   JAVA_VERSION: 17
+Build APK	Setup Flutter	2026-06-20T12:46:58.3371858Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:58.3372274Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Setup Flutter	2026-06-20T12:46:58.3372600Z ##[endgroup]
+Build APK	Install dependencies	﻿2026-06-20T12:46:58.6257879Z ##[group]Run flutter pub get
+Build APK	Install dependencies	2026-06-20T12:46:58.6258150Z ^[[36;1mflutter pub get^[[0m
+Build APK	Install dependencies	2026-06-20T12:46:58.6285890Z shell: /usr/bin/bash -e {0}
+Build APK	Install dependencies	2026-06-20T12:46:58.6286121Z env:
+Build APK	Install dependencies	2026-06-20T12:46:58.6286309Z   FLUTTER_VERSION: 3.32.x
+Build APK	Install dependencies	2026-06-20T12:46:58.6286522Z   JAVA_VERSION: 17
+Build APK	Install dependencies	2026-06-20T12:46:58.6286811Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Install dependencies	2026-06-20T12:46:58.6287219Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Install dependencies	2026-06-20T12:46:58.6287617Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Build APK	Install dependencies	2026-06-20T12:46:58.6287935Z   PUB_CACHE: /home/runner/.pub-cache
+Build APK	Install dependencies	2026-06-20T12:46:58.6288164Z ##[endgroup]
+Build APK	Install dependencies	2026-06-20T12:46:59.2076799Z Resolving dependencies...
+Build APK	Install dependencies	2026-06-20T12:47:00.7026371Z Downloading packages...
+Build APK	Install dependencies	2026-06-20T12:47:01.9526050Z + _fe_analyzer_shared 61.0.0 (104.0.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9526658Z + _macros 0.3.3 from sdk dart
+Build APK	Install dependencies	2026-06-20T12:47:01.9527014Z + analyzer 5.13.0 (14.0.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9527445Z + animations 2.1.1 (2.2.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9527811Z + archive 4.0.9
+Build APK	Install dependencies	2026-06-20T12:47:01.9528095Z + args 2.7.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9528385Z + async 2.13.0 (2.13.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9528726Z + boolean_selector 2.1.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9529059Z + build 2.4.1 (4.0.6 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9529403Z + build_config 1.1.2 (1.3.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9529755Z + build_daemon 4.1.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9530081Z + build_resolvers 2.4.2 (3.0.4 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9530459Z + build_runner 2.4.13 (2.15.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9530847Z + build_runner_core 7.3.2 (9.3.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9531397Z + built_collection 5.1.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9531697Z + built_value 8.12.6
+Build APK	Install dependencies	2026-06-20T12:47:01.9532007Z + characters 1.4.0 (1.4.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9532641Z + checked_yaml 2.0.4
+Build APK	Install dependencies	2026-06-20T12:47:01.9532932Z + cli_util 0.4.2 (0.5.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9533275Z + clock 1.1.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9533545Z + code_builder 4.11.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9533847Z + collection 1.19.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9534183Z + convert 3.1.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9534462Z + cross_file 0.3.5+2
+Build APK	Install dependencies	2026-06-20T12:47:01.9534733Z + crypto 3.0.7
+Build APK	Install dependencies	2026-06-20T12:47:01.9535036Z + cupertino_icons 1.0.8 (1.0.9 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9535408Z + dart_style 2.3.2 (3.1.9 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9535736Z + dartx 1.2.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9535987Z + dio 5.9.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9536243Z + dio_web_adapter 2.1.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9536541Z + equatable 2.0.8
+Build APK	Install dependencies	2026-06-20T12:47:01.9536821Z + fake_async 1.3.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9537078Z + ffi 2.2.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9537315Z + file 7.0.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9537604Z + file_picker 8.3.7 (11.0.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9537961Z + fixnum 1.1.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9538240Z + fl_chart 0.70.2 (1.2.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9538607Z + flutter 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9538944Z + flutter_animate 4.5.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9539254Z + flutter_driver 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9539815Z + flutter_fancy_tree_view 1.6.0 (discontinued replaced by two_dimensional_scrollables)
+Build APK	Install dependencies	2026-06-20T12:47:01.9540382Z + flutter_launcher_icons 0.14.4
+Build APK	Install dependencies	2026-06-20T12:47:01.9540757Z + flutter_lints 6.0.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9541374Z + flutter_markdown 0.7.7+1 (discontinued replaced by flutter_markdown_plus)
+Build APK	Install dependencies	2026-06-20T12:47:01.9541993Z + flutter_plugin_android_lifecycle 2.0.31 (2.0.35 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9542429Z + flutter_riverpod 2.2.0 (3.3.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9542830Z + flutter_secure_storage 9.2.4 (10.3.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9543275Z + flutter_secure_storage_linux 1.2.3 (3.0.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9543726Z + flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9544225Z + flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9544731Z + flutter_secure_storage_web 1.2.1 (2.1.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9545194Z + flutter_secure_storage_windows 3.1.2 (4.2.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9545616Z + flutter_shaders 0.1.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9546196Z + flutter_test 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9546556Z + flutter_vector_icons 2.0.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9546913Z + flutter_web_plugins 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9547306Z + freezed 3.0.0-0.0.dev (3.2.5 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9547664Z + freezed_annotation 3.1.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9547987Z + frontend_server_client 4.0.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9548368Z + fuchsia_remote_debug_protocol 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9548772Z + fuzzy 0.5.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9549050Z + glob 2.1.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9549337Z + go_router 14.8.1 (17.3.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9549690Z + google_fonts 6.3.2 (8.1.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9550040Z + graphs 2.3.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9550415Z + http 1.6.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9550721Z + http_multi_server 3.2.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9551214Z + http_parser 4.1.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9551511Z + image 4.8.0 (4.9.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9551942Z + integration_test 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9552314Z + intl 0.20.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9552571Z + io 1.0.5
+Build APK	Install dependencies	2026-06-20T12:47:01.9552829Z + isar 3.1.0+1
+Build APK	Install dependencies	2026-06-20T12:47:01.9553107Z + isar_flutter_libs 3.1.0+1
+Build APK	Install dependencies	2026-06-20T12:47:01.9553434Z + isar_generator 3.1.0+1
+Build APK	Install dependencies	2026-06-20T12:47:01.9553770Z + isolate_contactor 4.1.0 (4.2.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9554154Z + isolate_manager 4.1.5+1 (6.3.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9554519Z + js 0.6.7 (0.7.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9554868Z + json_annotation 4.9.0 (4.12.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9555265Z + json_serializable 6.8.0 (6.14.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9555678Z + leak_tracker 10.0.9 (11.0.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9556101Z + leak_tracker_flutter_testing 3.0.9 (3.0.10 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9556521Z + leak_tracker_testing 3.0.1 (3.0.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9557104Z + lints 6.1.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9557370Z + logger 2.7.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9557627Z + logging 1.3.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9557884Z + macros 0.1.3-main.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9558167Z + markdown 7.3.0 (7.3.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9558496Z + matcher 0.12.17 (0.12.20 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9558884Z + material_color_utilities 0.11.1 (0.13.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9559284Z + meta 1.16.0 (1.18.3 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9559591Z + mime 2.0.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9559866Z + mockito 5.4.4 (5.7.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9560221Z + package_config 2.2.0 (3.0.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9560573Z + path 1.9.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9560879Z + path_provider 2.1.5 (2.1.6 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9561462Z + path_provider_android 2.2.19 (2.3.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9561893Z + path_provider_foundation 2.4.2 (2.6.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9562303Z + path_provider_linux 2.2.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9562691Z + path_provider_platform_interface 2.1.2 (2.1.3 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9563142Z + path_provider_windows 2.3.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9563532Z + permission_handler 11.4.0 (12.0.3 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9563961Z + permission_handler_android 12.1.0 (13.0.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9564430Z + permission_handler_apple 9.4.10
+Build APK	Install dependencies	2026-06-20T12:47:01.9564793Z + permission_handler_html 0.1.3+5
+Build APK	Install dependencies	2026-06-20T12:47:01.9565191Z + permission_handler_platform_interface 4.3.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9565622Z + permission_handler_windows 0.2.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9565986Z + petitparser 7.0.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9566289Z + platform 3.1.6
+Build APK	Install dependencies	2026-06-20T12:47:01.9566615Z + plugin_platform_interface 2.1.8
+Build APK	Install dependencies	2026-06-20T12:47:01.9566977Z + pool 1.5.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9567250Z + posix 6.5.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9567552Z + process 5.0.3 (5.0.5 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9567894Z + pub_semver 2.2.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9568191Z + pubspec_parse 1.5.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9568501Z + quiver 3.2.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9568775Z + re_editor 0.9.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9569068Z + re_highlight 0.0.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9569405Z + riverpod 2.2.0 (3.3.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9569795Z + riverpod_annotation 1.2.1 (4.0.3 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9570213Z + riverpod_generator 1.1.1 (4.0.4 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9570828Z + share_plus 10.1.4 (13.1.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9571389Z + share_plus_platform_interface 5.0.2 (7.1.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9571813Z + shared_preferences 2.5.3 (2.5.5 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9572238Z + shared_preferences_android 2.4.13 (2.4.26 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9572694Z + shared_preferences_foundation 2.5.4 (2.5.6 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9573113Z + shared_preferences_linux 2.4.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9573562Z + shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9574014Z + shared_preferences_web 2.4.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9574370Z + shared_preferences_windows 2.4.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9574688Z + shelf 1.4.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9574950Z + shelf_web_socket 2.0.1 (3.0.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9575329Z + sky_engine 0.0.0 from sdk flutter
+Build APK	Install dependencies	2026-06-20T12:47:01.9575670Z + source_gen 1.5.0 (4.2.3 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9576020Z + source_helper 1.3.5 (1.3.12 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9576398Z + source_span 1.10.1 (1.10.2 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9576733Z + stack_trace 1.12.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9577037Z + state_notifier 0.7.2+1 (1.0.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9577428Z + stream_channel 2.1.4
+Build APK	Install dependencies	2026-06-20T12:47:01.9577736Z + stream_transform 2.1.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9578034Z + string_scanner 1.4.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9578328Z + stringr 1.2.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9578601Z + sync_http 0.3.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9578874Z + term_glyph 1.2.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9579065Z + test_api 0.7.4 (0.7.12 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9579371Z + time 2.1.6
+Build APK	Install dependencies	2026-06-20T12:47:01.9579631Z + timing 1.0.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9579909Z + typed_data 1.4.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9580180Z + url_launcher 6.3.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9580500Z + url_launcher_android 6.3.20 (6.3.32 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9581283Z + url_launcher_ios 6.3.4 (6.4.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9581630Z + url_launcher_linux 3.2.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9581927Z + url_launcher_macos 3.2.3 (3.2.5 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9582327Z + url_launcher_platform_interface 2.3.2
+Build APK	Install dependencies	2026-06-20T12:47:01.9582702Z + url_launcher_web 2.4.1 (2.4.3 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9583076Z + url_launcher_windows 3.1.5
+Build APK	Install dependencies	2026-06-20T12:47:01.9583390Z + uuid 4.5.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9583654Z + vector_math 2.1.4 (2.4.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9584010Z + vm_service 15.0.0 (15.2.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9584356Z + watcher 1.2.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9584621Z + web 1.1.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9584889Z + web_socket 1.0.1
+Build APK	Install dependencies	2026-06-20T12:47:01.9585170Z + web_socket_channel 3.0.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9585476Z + webdriver 3.1.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9585784Z + win32 5.15.0 (6.3.0 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9586139Z + xdg_directories 1.1.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9586465Z + xml 6.6.1 (7.0.1 available)
+Build APK	Install dependencies	2026-06-20T12:47:01.9586804Z + xterm 4.0.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9587097Z + xxh3 1.2.0
+Build APK	Install dependencies	2026-06-20T12:47:01.9587369Z + yaml 3.1.3
+Build APK	Install dependencies	2026-06-20T12:47:01.9587650Z + zmodem 0.0.6
+Build APK	Install dependencies	2026-06-20T12:47:01.9587983Z Changed 171 dependencies!
+Build APK	Install dependencies	2026-06-20T12:47:01.9588342Z 2 packages are discontinued.
+Build APK	Install dependencies	2026-06-20T12:47:01.9588861Z 71 packages have newer versions incompatible with dependency constraints.
+Build APK	Install dependencies	2026-06-20T12:47:01.9589457Z Try `flutter pub outdated` for more information.
+Build APK	Generate Launcher Icons	﻿2026-06-20T12:47:02.9842524Z ##[group]Run dart run flutter_launcher_icons
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9842853Z ^[[36;1mdart run flutter_launcher_icons^[[0m
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9870185Z shell: /usr/bin/bash -e {0}
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9870421Z env:
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9870600Z   FLUTTER_VERSION: 3.32.x
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9870808Z   JAVA_VERSION: 17
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9871293Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9871705Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9872100Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9872433Z   PUB_CACHE: /home/runner/.pub-cache
+Build APK	Generate Launcher Icons	2026-06-20T12:47:02.9872662Z ##[endgroup]
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.3132125Z   ════════════════════════════════════════════
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.3132584Z      FLUTTER LAUNCHER ICONS (v0.14.4)                               
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.3132967Z   ════════════════════════════════════════════
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.3133202Z   
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.3674661Z • Creating default icons Android
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.4768916Z • Overwriting the default Android launcher icon with a new icon
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.6063273Z No platform provided
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.6063605Z 
+Build APK	Generate Launcher Icons	2026-06-20T12:47:04.6064035Z ✓ Successfully generated launcher icons
+Build APK	Build release APK	﻿2026-06-20T12:47:04.6255534Z ##[group]Run flutter build apk --release || true
+Build APK	Build release APK	2026-06-20T12:47:04.6255874Z ^[[36;1mflutter build apk --release || true^[[0m
+Build APK	Build release APK	2026-06-20T12:47:04.6283300Z shell: /usr/bin/bash -e {0}
+Build APK	Build release APK	2026-06-20T12:47:04.6283527Z env:
+Build APK	Build release APK	2026-06-20T12:47:04.6283710Z   FLUTTER_VERSION: 3.32.x
+Build APK	Build release APK	2026-06-20T12:47:04.6283945Z   JAVA_VERSION: 17
+Build APK	Build release APK	2026-06-20T12:47:04.6284230Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Build release APK	2026-06-20T12:47:04.6284636Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Build release APK	2026-06-20T12:47:04.6285032Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Build APK	Build release APK	2026-06-20T12:47:04.6285354Z   PUB_CACHE: /home/runner/.pub-cache
+Build APK	Build release APK	2026-06-20T12:47:04.6285584Z ##[endgroup]
+Build APK	Build release APK	2026-06-20T12:47:56.4352882Z Running Gradle task 'assembleRelease'...                        
+Build APK	Build release APK	2026-06-20T12:47:56.4362171Z e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:
+Build APK	Build release APK	2026-06-20T12:47:56.4375181Z     1. Kotlin compile daemon is ready
+Build APK	Build release APK	2026-06-20T12:48:32.0239451Z Checking the license for package NDK (Side by side) 27.0.12077973 in /usr/local/lib/android/sdk/licenses
+Build APK	Build release APK	2026-06-20T12:48:32.0240799Z License for package NDK (Side by side) 27.0.12077973 accepted.
+Build APK	Build release APK	2026-06-20T12:48:32.0246091Z Preparing "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973".
+Build APK	Build release APK	2026-06-20T12:48:48.1216254Z "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" ready.
+Build APK	Build release APK	2026-06-20T12:48:48.1217291Z Installing NDK (Side by side) 27.0.12077973 in /usr/local/lib/android/sdk/ndk/27.0.12077973
+Build APK	Build release APK	2026-06-20T12:48:48.1218220Z "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" complete.
+Build APK	Build release APK	2026-06-20T12:48:48.3230839Z "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" finished.
+Build APK	Build release APK	2026-06-20T12:49:51.2215570Z lib/main.dart:3250:48: Error: Can't find '}' to match '{'.
+Build APK	Build release APK	2026-06-20T12:49:51.2216520Z       for (int i = 0; i < allKeys.length; i++) {
+Build APK	Build release APK	2026-06-20T12:49:51.2217218Z                                                ^
+Build APK	Build release APK	2026-06-20T12:49:54.1215591Z lib/main.dart:3130:18: Error: Too few positional arguments: 4 required, 3 given.
+Build APK	Build release APK	2026-06-20T12:49:54.1216621Z       _setHeaders(request, provider, settings, stream: false);
+Build APK	Build release APK	2026-06-20T12:49:54.1217115Z                  ^
+Build APK	Build release APK	2026-06-20T12:50:03.7272030Z Target kernel_snapshot_program failed: Exception
+Build APK	Build release APK	2026-06-20T12:50:03.7272764Z 
+Build APK	Build release APK	2026-06-20T12:50:13.2230373Z 
+Build APK	Build release APK	2026-06-20T12:50:13.2231504Z FAILURE: Build failed with an exception.
+Build APK	Build release APK	2026-06-20T12:50:13.2231884Z 
+Build APK	Build release APK	2026-06-20T12:50:13.2232072Z * What went wrong:
+Build APK	Build release APK	2026-06-20T12:50:13.2232511Z Execution failed for task ':app:compileFlutterBuildRelease'.
+Build APK	Build release APK	2026-06-20T12:50:13.2233442Z > Process 'command '/opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter/bin/flutter'' finished with non-zero exit value 1
+Build APK	Build release APK	2026-06-20T12:50:13.2234097Z 
+Build APK	Build release APK	2026-06-20T12:50:13.2234354Z * Try:
+Build APK	Build release APK	2026-06-20T12:50:13.2234768Z > Run with --stacktrace option to get the stack trace.
+Build APK	Build release APK	2026-06-20T12:50:13.2235326Z > Run with --info or --debug option to get more log output.
+Build APK	Build release APK	2026-06-20T12:50:13.2235912Z > Run with --scan to get full insights.
+Build APK	Build release APK	2026-06-20T12:50:13.2236318Z > Get more help at https://help.gradle.org.
+Build APK	Build release APK	2026-06-20T12:50:13.2236597Z 
+Build APK	Build release APK	2026-06-20T12:50:13.2236779Z BUILD FAILED in 3m 7s
+Build APK	Build release APK	2026-06-20T12:50:13.6397644Z Running Gradle task 'assembleRelease'...                          187.9s
+Build APK	Build release APK	2026-06-20T12:50:13.6469352Z Gradle task assembleRelease failed with exit code 1
+Build APK	Find generated APKs	﻿2026-06-20T12:50:13.6536440Z ##[group]Run find . -name "*.apk"
+Build APK	Find generated APKs	2026-06-20T12:50:13.6536719Z ^[[36;1mfind . -name "*.apk"^[[0m
+Build APK	Find generated APKs	2026-06-20T12:50:13.6536935Z ^[[36;1mmkdir -p apk_output^[[0m
+Build APK	Find generated APKs	2026-06-20T12:50:13.6537193Z ^[[36;1mfind . -name "*.apk" -exec cp {} apk_output/ \;^[[0m
+Build APK	Find generated APKs	2026-06-20T12:50:13.6575855Z shell: /usr/bin/bash -e {0}
+Build APK	Find generated APKs	2026-06-20T12:50:13.6576075Z env:
+Build APK	Find generated APKs	2026-06-20T12:50:13.6576258Z   FLUTTER_VERSION: 3.32.x
+Build APK	Find generated APKs	2026-06-20T12:50:13.6576462Z   JAVA_VERSION: 17
+Build APK	Find generated APKs	2026-06-20T12:50:13.6576735Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Find generated APKs	2026-06-20T12:50:13.6577142Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Find generated APKs	2026-06-20T12:50:13.6577527Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Build APK	Find generated APKs	2026-06-20T12:50:13.6577834Z   PUB_CACHE: /home/runner/.pub-cache
+Build APK	Find generated APKs	2026-06-20T12:50:13.6578054Z ##[endgroup]
+Build APK	Upload APK artifact	﻿2026-06-20T12:50:13.6727484Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6728422Z ##[group]Run actions/upload-artifact@v4
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6728655Z with:
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6728828Z   name: release-apk
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6729023Z   path: apk_output/*.apk
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6729232Z   retention-days: 14
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6729429Z   if-no-files-found: warn
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6729629Z   compression-level: 6
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6729817Z   overwrite: false
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6730008Z   include-hidden-files: false
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6730213Z env:
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6730378Z   FLUTTER_VERSION: 3.32.x
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6730581Z   JAVA_VERSION: 17
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6730850Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6731611Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6732004Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6732315Z   PUB_CACHE: /home/runner/.pub-cache
+Build APK	Upload APK artifact	2026-06-20T12:50:13.6732538Z ##[endgroup]
+Build APK	Upload APK artifact	2026-06-20T12:50:13.7993691Z (node:2999) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build APK	Upload APK artifact	2026-06-20T12:50:13.7994418Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build APK	Upload APK artifact	2026-06-20T12:50:13.8052038Z ##[warning]No files were found with the provided path: apk_output/*.apk. No artifacts will be uploaded.
+Build APK	Build summary	﻿2026-06-20T12:50:13.8140177Z ##[group]Run echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+Build APK	Build summary	2026-06-20T12:50:13.8140552Z ^[[36;1mecho "## Build Summary" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8140862Z ^[[36;1mecho "| Property | Value |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8141386Z ^[[36;1mecho "|----------|-------|" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8141710Z ^[[36;1mecho "| Branch | \`main\` |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8142139Z ^[[36;1mecho "| Commit | \`f4cf3e5cb08af630075438f4d654880b288c01b4\` |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8142550Z ^[[36;1mecho "| Flutter | 3.32.x |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8142895Z ^[[36;1mif [ -f build/app/outputs/flutter-apk/app-release.apk ]; then^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8143284Z ^[[36;1m  SIZE=$(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8143659Z ^[[36;1m  echo "| APK Size | $SIZE |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8143978Z ^[[36;1m  echo "| Status | ✅ Success |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8144276Z ^[[36;1melse^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8144499Z ^[[36;1m  echo "| Status | ❌ Failed |" >> $GITHUB_STEP_SUMMARY^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8144760Z ^[[36;1mfi^[[0m
+Build APK	Build summary	2026-06-20T12:50:13.8171777Z shell: /usr/bin/bash -e {0}
+Build APK	Build summary	2026-06-20T12:50:13.8172007Z env:
+Build APK	Build summary	2026-06-20T12:50:13.8172182Z   FLUTTER_VERSION: 3.32.x
+Build APK	Build summary	2026-06-20T12:50:13.8172394Z   JAVA_VERSION: 17
+Build APK	Build summary	2026-06-20T12:50:13.8172667Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Build summary	2026-06-20T12:50:13.8173069Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+Build APK	Build summary	2026-06-20T12:50:13.8173459Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.8-x64/flutter
+Build APK	Build summary	2026-06-20T12:50:13.8173764Z   PUB_CACHE: /home/runner/.pub-cache
+Build APK	Build summary	2026-06-20T12:50:13.8173983Z ##[endgroup]
+Build APK	Post Setup Flutter	﻿2026-06-20T12:50:13.8342410Z Post job cleanup.
+Build APK	Post Setup Flutter	2026-06-20T12:50:14.0872734Z Post job cleanup.
+Build APK	Post Setup Flutter	2026-06-20T12:50:14.1952446Z Cache hit occurred on the primary key flutter-pub-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1-, not saving cache.
+Build APK	Post Setup Flutter	2026-06-20T12:50:14.2053215Z Post job cleanup.
+Build APK	Post Setup Flutter	2026-06-20T12:50:14.3112589Z Cache hit occurred on the primary key flutter-linux-stable-3.32.8-x64-edada7c56edf4a183c1735310e123c7f923584f1, not saving cache.
+Build APK	Post Setup Java	﻿2026-06-20T12:50:14.3224385Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build APK	Post Setup Java	2026-06-20T12:50:14.3225346Z Post job cleanup.
+Build APK	Post Setup Java	2026-06-20T12:50:14.4213226Z (node:3040) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Build APK	Post Setup Java	2026-06-20T12:50:14.4213824Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Build APK	Post Checkout	﻿2026-06-20T12:50:14.4379254Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build APK	Post Checkout	2026-06-20T12:50:14.4381080Z Post job cleanup.
+Build APK	Post Checkout	2026-06-20T12:50:14.5073777Z [command]/usr/bin/git version
+Build APK	Post Checkout	2026-06-20T12:50:14.5137006Z git version 2.54.0
+Build APK	Post Checkout	2026-06-20T12:50:14.5164959Z Temporarily overriding HOME='/home/runner/work/_temp/ea346c98-a60d-4c04-800c-111a7329630e' before making global git config changes
+Build APK	Post Checkout	2026-06-20T12:50:14.5166176Z Adding repository directory to the temporary git global config as a safe directory
+Build APK	Post Checkout	2026-06-20T12:50:14.5168992Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/termux_forge/termux_forge
+Build APK	Post Checkout	2026-06-20T12:50:14.5391957Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build APK	Post Checkout	2026-06-20T12:50:14.5430548Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build APK	Post Checkout	2026-06-20T12:50:14.5619931Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build APK	Post Checkout	2026-06-20T12:50:14.5639344Z http.https://github.com/.extraheader
+Build APK	Post Checkout	2026-06-20T12:50:14.5647576Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Build APK	Post Checkout	2026-06-20T12:50:14.6825137Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build APK	Post Checkout	2026-06-20T12:50:14.7701458Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build APK	Post Checkout	2026-06-20T12:50:14.7726348Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build APK	Complete job	﻿2026-06-20T12:50:14.8017102Z Cleaning up orphan processes
+Build APK	Complete job	2026-06-20T12:50:14.8275295Z Terminate orphan process: pid (2512) (java)
+Build APK	Complete job	2026-06-20T12:50:14.8302613Z Terminate orphan process: pid (2661) (java)
+Build APK	Complete job	2026-06-20T12:50:14.8345684Z Terminate orphan process: pid (2959) (java)
+Build APK	Complete job	2026-06-20T12:50:14.8355133Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

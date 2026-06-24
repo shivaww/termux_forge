@@ -7,5 +7,5 @@
 /// definitions, enums, and data classes used across the agent system.
 library;
 
-export 'package:termux_forge/agents/base/agent_types.dart';
-export 'package:termux_forge/agents/base/base_agent.dart';
+export 'package:nexon/agents/base/agent_types.dart';
+export 'package:nexon/agents/base/base_agent.dart';

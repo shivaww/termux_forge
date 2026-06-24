@@ -4,4 +4,4 @@
 /// Barrel export for the database expert agent module.
 library;
 
-export 'package:termux_forge/agents/database_expert/database_expert_agent.dart';
+export 'package:nexon/agents/database_expert/database_expert_agent.dart';

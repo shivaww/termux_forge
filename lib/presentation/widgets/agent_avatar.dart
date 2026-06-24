@@ -7,7 +7,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
+import 'package:nexon/core/theme/app_colors.dart';
 
 /// Size variants for [AgentAvatar].
 enum AvatarSize { small, medium, large, xlarge }

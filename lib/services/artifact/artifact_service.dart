@@ -4,7 +4,7 @@
 /// with provenance, versioning, history, and linking to tasks and workflows.
 library;
 
-import 'package:termux_forge/data/models/artifact_model.dart';
+import 'package:nexon/data/models/artifact_model.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 

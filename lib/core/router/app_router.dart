@@ -8,16 +8,16 @@ library;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:termux_forge/presentation/screens/agents/agent_observability_screen.dart';
-import 'package:termux_forge/presentation/screens/chat/chat_screen.dart';
-import 'package:termux_forge/presentation/screens/editor/editor_screen.dart';
-import 'package:termux_forge/presentation/screens/file_explorer/file_explorer_screen.dart';
-import 'package:termux_forge/presentation/screens/home/home_screen.dart';
-import 'package:termux_forge/presentation/screens/model_center/model_center_screen.dart';
-import 'package:termux_forge/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:termux_forge/presentation/screens/settings/settings_screen.dart';
-import 'package:termux_forge/presentation/screens/terminal/terminal_screen.dart';
-import 'package:termux_forge/presentation/screens/todo/todo_dashboard_screen.dart';
+import 'package:nexon/presentation/screens/agents/agent_observability_screen.dart';
+import 'package:nexon/presentation/screens/chat/chat_screen.dart';
+import 'package:nexon/presentation/screens/editor/editor_screen.dart';
+import 'package:nexon/presentation/screens/file_explorer/file_explorer_screen.dart';
+import 'package:nexon/presentation/screens/home/home_screen.dart';
+import 'package:nexon/presentation/screens/model_center/model_center_screen.dart';
+import 'package:nexon/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:nexon/presentation/screens/settings/settings_screen.dart';
+import 'package:nexon/presentation/screens/terminal/terminal_screen.dart';
+import 'package:nexon/presentation/screens/todo/todo_dashboard_screen.dart';
 
 /// Global navigator keys for nested navigation.
 final rootNavigatorKey = GlobalKey<NavigatorState>();

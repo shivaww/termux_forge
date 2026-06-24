@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
+import 'package:nexon/core/theme/app_colors.dart';
 
 /// Application-wide theme factory.
 abstract final class AppTheme {

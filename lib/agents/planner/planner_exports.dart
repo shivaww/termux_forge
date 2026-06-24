@@ -4,4 +4,4 @@
 /// Barrel export for the planner agent module.
 library;
 
-export 'package:termux_forge/agents/planner/planner_agent.dart';
+export 'package:nexon/agents/planner/planner_agent.dart';

@@ -4,4 +4,4 @@
 /// Barrel export for the researcher agent module.
 library;
 
-export 'package:termux_forge/agents/researcher/researcher_agent.dart';
+export 'package:nexon/agents/researcher/researcher_agent.dart';

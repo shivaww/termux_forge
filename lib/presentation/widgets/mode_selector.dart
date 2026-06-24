@@ -9,7 +9,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
+import 'package:nexon/core/theme/app_colors.dart';
 
 /// Definition of an operational mode.
 class ForgeMode {

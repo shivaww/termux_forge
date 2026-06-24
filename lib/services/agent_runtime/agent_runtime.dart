@@ -8,9 +8,9 @@ import 'dart:async';
 
 import 'package:uuid/uuid.dart';
 
-import 'package:termux_forge/services/agent_runtime/agent_runtime_types.dart';
-import 'package:termux_forge/services/event_bus/event_bus.dart';
-import 'package:termux_forge/services/event_bus/event_types.dart';
+import 'package:nexon/services/agent_runtime/agent_runtime_types.dart';
+import 'package:nexon/services/event_bus/event_bus.dart';
+import 'package:nexon/services/event_bus/event_types.dart';
 
 /// Manages the lifecycle and orchestration of all agents in the system.
 ///

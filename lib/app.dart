@@ -7,8 +7,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:termux_forge/core/router/app_router.dart';
-import 'package:termux_forge/core/theme/app_theme.dart';
+import 'package:nexon/core/router/app_router.dart';
+import 'package:nexon/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 
 /// Root widget for the TermuxForge application.

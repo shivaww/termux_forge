@@ -4,4 +4,4 @@
 /// Barrel export for the reviewer agent module.
 library;
 
-export 'package:termux_forge/agents/reviewer/reviewer_agent.dart';
+export 'package:nexon/agents/reviewer/reviewer_agent.dart';

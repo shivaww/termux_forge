@@ -1,4 +1,4 @@
-name: termux_forge
+name: nexon
 description: "TermuxForge — Mobile Agentic Flutter + Termux IDE"
 publish_to: 'none'
 version: 0.1.0+1

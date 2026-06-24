@@ -11,10 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
-import 'package:termux_forge/presentation/widgets/forge_app_bar.dart';
-import 'package:termux_forge/presentation/widgets/status_badge.dart';
-import 'package:termux_forge/services/termux_bridge/termux_bridge_service.dart';
+import 'package:nexon/core/theme/app_colors.dart';
+import 'package:nexon/presentation/widgets/forge_app_bar.dart';
+import 'package:nexon/presentation/widgets/status_badge.dart';
+import 'package:nexon/services/termux_bridge/termux_bridge_service.dart';
 
 /// The terminal screen.
 class TerminalScreen extends StatefulWidget {

@@ -5,7 +5,7 @@
 /// project membership.
 library;
 
-import 'package:termux_forge/data/models/workspace_model.dart';
+import 'package:nexon/data/models/workspace_model.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 

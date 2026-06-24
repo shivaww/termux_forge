@@ -16,7 +16,7 @@ import 'dart:async';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:termux_forge/agents/base/agent_types.dart';
+import 'package:nexon/agents/base/agent_types.dart';
 
 /// Singleton UUID generator shared by all agents.
 const _uuid = Uuid();

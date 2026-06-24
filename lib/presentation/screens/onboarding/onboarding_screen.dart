@@ -12,10 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
-import 'package:termux_forge/presentation/widgets/glass_card.dart';
-import 'package:termux_forge/presentation/widgets/status_badge.dart';
-import 'package:termux_forge/services/storage/app_storage.dart';
+import 'package:nexon/core/theme/app_colors.dart';
+import 'package:nexon/presentation/widgets/glass_card.dart';
+import 'package:nexon/presentation/widgets/status_badge.dart';
+import 'package:nexon/services/storage/app_storage.dart';
 
 /// The onboarding wizard screen.
 class OnboardingScreen extends StatefulWidget {

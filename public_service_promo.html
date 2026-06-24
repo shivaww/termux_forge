@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TermuxForge AI - Democratizing Visual AI Education</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-light: #f9fafb;
+            --bg-dark: #111827;
+            --card: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .hero {
+            padding: 6rem 0;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        section {
+            padding: 5rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: var(--text);
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        
+        .card p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+        
+        .highlight {
+            background: var(--bg-light);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .visual-demo {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .demo-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: var(--radius);
+        }
+        
+        .demo-item svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        
+        .public-service {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .public-service h2 {
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .mission-statement {
+            font-size: 1.25rem;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            opacity: 0.9;
+        }
+        
+        footer {
+            background: var(--bg-dark);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">TFA</div>
+                TermuxForge AI
+            </a>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#visual">Visual AI</a>
+                <a href="#service">Public Service</a>
+                <a href="#download">Download</a>
+                <a href="#contribute">Contribute</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Democratizing Visual AI Education</h1>
+                <p class="hero-subtitle">Transforming AI conversations into interactive visual learning experiences for everyone. Free, open-source, and accessible on mobile devices worldwide.</p>
+                <div class="cta-buttons">
+                    <a href="#download" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Download Now
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" style="background: var(--bg-light);">
+            <div class="container">
+                <h2 class="section-title">Why TermuxForge AI?</h2>
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 3rem; color: var(--text-light);">
+                    Most AI assistants only generate text. TermuxForge AI transforms complex concepts into visual, interactive learning experiences that everyone can understand.
+                </p>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">🎯</div>
+                        <h3>Visual AI Assistant</h3>
+                        <p>Instead of text-only responses, get interactive diagrams, graphs, and visual explanations that make learning intuitive and engaging.</p>
+                        <div class="highlight">
+                            <strong>Public Benefit:</strong> Makes advanced AI accessible to visual learners and non-technical users.
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">📱</div>
+                        <h3>Mobile-First Design</h3>
+                        <p>Built for Android with Termux integration, bringing powerful AI capabilities to mobile devices everywhere.</p>
+                        <div class="highlight">
+                            <strong>Public Benefit:</strong> Bridges the digital divide by making AI accessible on affordable mobile devices.
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🔓</div>
+                        <h3>Open Source</h3>
+                        <p>Completely free and open-source. No subscriptions, no paywalls, no data selling.</p>
+                        <div class="highlight">
+                            <strong>Public Benefit:</strong> Ensures transparency and allows global community collaboration.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="visual" class="container">
+            <h2 class="section-title">Interactive Visual Learning</h2>
+            
+            <div class="visual-demo">
+                <h3 style="text-align: center; margin-bottom: 2rem;">See Visual AI in Action</h3>
+                
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <circle cx="50" cy="30" r="20" fill="#3b82f6" opacity="0.2"/>
+                            <circle cx="30" cy="70" r="15" fill="#10b981" opacity="0.2"/>
+                            <circle cx="70" cy="70" r="15" fill="#8b5cf6" opacity="0.2"/>
+                            <path d="M50,30 L30,70" stroke="#3b82f6" stroke-width="2" fill="none"/>
+                            <path d="M50,30 L70,70" stroke="#3b82f6" stroke-width="2" fill="none"/>
+                            <path d="M30,70 L70,70" stroke="#10b981" stroke-width="2" fill="none"/>
+                            <circle cx="50" cy="30" r="3" fill="#3b82f6"/>
+                            <circle cx="30" cy="70" r="3" fill="#10b981"/>
+                            <circle cx="70" cy="70" r="3" fill="#8b5cf6"/>
+                            <text x="50" y="25" text-anchor="middle" font-size="8" fill="#1f2937">A</text>
+                            <text x="25" y="75" text-anchor="middle" font-size="8" fill="#1f2937">B</text>
+                            <text x="75" y="75" text-anchor="middle" font-size="8" fill="#1f2937">C</text>
+                        </svg>
+                        <h4>Geometry Visualization</h4>
+                        <p>Interactive triangle geometry with live angle calculations</p>
+                    </div>
+                    
+                    <div class="demo-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <rect x="20" y="40" width="60" height="30" fill="#fbbf24" opacity="0.2" stroke="#f59e0b" stroke-width="2"/>
+                            <rect x="25" y="45" width="15" height="20" fill="#ef4444" opacity="0.3"/>
+                            <rect x="45" y="45" width="15" height="20" fill="#10b981" opacity="0.3"/>
+                            <rect x="65" y="45" width="10" height="20" fill="#3b82f6" opacity="0.3"/>
+                            <text x="32" y="58" text-anchor="middle" font-size="6" fill="#1f2937">Nucleus</text>
+                            <text x="52" y="58" text-anchor="middle" font-size="6" fill="#1f2937">Mitochondria</text>
+                            <text x="70" y="58" text-anchor="middle" font-size="6" fill="#1f2937">ER</text>
+                            <text x="50" y="35" text-anchor="middle" font-size="8" fill="#1f2937">Cell Structure</text>
+                        </svg>
+                        <h4>Biology Diagrams</h4>
+                        <p>Detailed cellular biology with labeled components</p>
+                    </div>
+                    
+                    <div class="demo-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <path d="M20,50 Q50,20 80,50" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+                            <circle cx="20" cy="50" r="3" fill="#8b5cf6"/>
+                            <circle cx="50" cy="20" r="3" fill="#8b5cf6"/>
+                            <circle cx="80" cy="50" r="3" fill="#8b5cf6"/>
+                            <path d="M20,50 L20,80" stroke="#6b7280" stroke-width="1" stroke-dasharray="4"/>
+                            <path d="M80,50 L80,80" stroke="#6b7280" stroke-width="1" stroke-dasharray="4"/>
+                            <path d="M20,80 L80,80" stroke="#1f2937" stroke-width="2"/>
+                            <text x="20" y="85" text-anchor="middle" font-size="6" fill="#1f2937">A</text>
+                            <text x="80" y="85" text-anchor="middle" font-size="6" fill="#1f2937">B</text>
+                            <text x="50" y="15" text-anchor="middle" font-size="6" fill="#1f2937">f(x)</text>
+                            <text x="50" y="95" text-anchor="middle" font-size="8" fill="#1f2937">Calculus Integration</text>
+                        </svg>
+                        <h4>Math Functions</h4>
+                        <p>Function plotting with integration visualization</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Free & Open Source</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Visualization Types</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Subscription Fees</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Learning Potential</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="service" class="public-service">
+            <div class="container">
+                <h2 class="section-title">Our Public Service Mission</h2>
+                <p class="mission-statement">
+                    TermuxForge AI is more than an app—it's a public service initiative to democratize AI education and make advanced learning tools accessible to everyone, regardless of location, background, or economic status.
+                </p>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">🌍</div>
+                        <h3>Global Accessibility</h3>
+                        <p>Designed to work on affordable Android devices, reaching communities with limited access to expensive computers or internet connectivity.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🏫</div>
+                        <h3>Education First</h3>
+                        <p>Perfect for students, teachers, and lifelong learners in developing regions where educational resources are scarce.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🔬</div>
+                        <h3>Research Support</h3>
+                        <p>Empowers researchers and scientists with visual analysis tools without requiring expensive software licenses.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="download" class="container">
+            <h2 class="section-title">Get TermuxForge AI</h2>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="card" style="text-align: center;">
+                    <div class="card-icon" style="margin: 0 auto 2rem;">📱</div>
+                    <h3>Available Now for Android</h3>
+                    <p style="margin-bottom: 2rem;">Join thousands of users who are transforming how they learn with visual AI assistance.</p>
+                    
+                    <div class="cta-buttons" style="justify-content: center;">
+                        <a href="https://github.com/shivaww/termux_forge" class="btn btn-primary" style="background: var(--primary); color: white;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                            </svg>
+                            GitHub Repository
+                        </a>
+                        <a href="https://github.com/shivaww/termux_forge/termux_forge.apk" class="btn btn-secondary" style="border-color: var(--primary); color: var(--primary);">
+                            Download APK
+                        </a>
+                    </div>
+                    
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-light); border-radius: var(--radius);">
+                        <h4 style="margin-bottom: 1rem;">System Requirements</h4>
+                        <p style="color: var(--text-light);">Android 8.0+ • 100MB free space • Internet connection for AI features</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contribute" style="background: var(--bg-light);">
+            <div class="container">
+                <h2 class="section-title">Join Our Public Service Mission</h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>For Developers</h3>
+                        <p>Contribute to our open-source project. Help build visualizations, improve performance, or add new features.</p>
+                        <a href="https://github.com/shivaww/termux_forge" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-top: 1rem;">
+                            View on GitHub →
+                        </a>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>For Educators</h3>
+                        <p>Create educational content, suggest curriculum integrations, or help translate for global accessibility.</p>
+                        <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-top: 1rem;">
+                            Contact Education Team →
+                        </a>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>For Users</h3>
+                        <p>Share your experience, report issues, or suggest features. Your feedback helps improve the tool for everyone.</p>
+                        <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-top: 1rem;">
+                            Join Community →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>TermuxForge AI</h3>
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1rem;">Democratizing visual AI education through open-source technology.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/shivaww/termux_forge">GitHub Repository</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Community</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Discord Server</a></li>
+                        <li><a href="#">GitHub Discussions</a></li>
+                        <li><a href="#">Contributor Guidelines</a></li>
+                        <li><a href="#">Code of Conduct</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Public Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Education Initiatives</a></li>
+                        <li><a href="#">Accessibility Features</a></li>
+                        <li><a href="#">Global Outreach</a></li>
+                        <li><a href="#">Research Partnerships</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© 2024 TermuxForge AI. Open-source software released under MIT License.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Made with ❤️ for global education accessibility</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all cards and demo items
+        document.querySelectorAll('.card, .demo-item, .stat-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

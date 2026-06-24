@@ -41,7 +41,7 @@ class ForgeChatApp extends StatelessWidget {
     final baseText = GoogleFonts.manropeTextTheme();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Forge Chat',
+      title: 'Nexon',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -1621,7 +1621,7 @@ class ChatHistoryPanel extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Forge Chat',
+                    'Nexon',
                     style: GoogleFonts.notoSerif(
                       fontSize: 25,
                       fontWeight: FontWeight.w700,
@@ -4326,7 +4326,7 @@ class AppMark extends StatelessWidget {
         color: const Color(0xFF2E241C),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(Icons.auto_awesome, color: Color(0xFFFFE0A8)),
+      child: const Icon(Icons.api, color: Color(0xFFFFE0A8)),
     );
   }
 }

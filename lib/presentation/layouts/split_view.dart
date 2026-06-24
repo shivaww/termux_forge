@@ -7,7 +7,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:termux_forge/core/theme/app_colors.dart';
+import 'package:nexon/core/theme/app_colors.dart';
 
 /// A resizable split view with a drag handle between two panes.
 ///

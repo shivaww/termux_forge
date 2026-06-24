@@ -3,5 +3,5 @@
 // Re-exports all public types from the event_bus module.
 // ============================================================================
 
-export 'package:termux_forge/services/event_bus/event_bus.dart';
-export 'package:termux_forge/services/event_bus/event_types.dart';
+export 'package:nexon/services/event_bus/event_bus.dart';
+export 'package:nexon/services/event_bus/event_types.dart';

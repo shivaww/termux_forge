@@ -7,9 +7,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:termux_forge/services/llm/llm_types.dart';
-import 'package:termux_forge/services/event_bus/event_bus.dart';
-import 'package:termux_forge/services/event_bus/event_types.dart';
+import 'package:nexon/services/llm/llm_types.dart';
+import 'package:nexon/services/event_bus/event_bus.dart';
+import 'package:nexon/services/event_bus/event_types.dart';
 
 /// Multi-provider LLM service with intelligent model routing.
 ///

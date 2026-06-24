@@ -6,7 +6,7 @@
 /// from progress notes when subtask granularity is available.
 library;
 
-import 'package:termux_forge/data/models/todo_model.dart';
+import 'package:nexon/data/models/todo_model.dart';
 import 'package:uuid/uuid.dart';
 import 'package:logger/logger.dart';
 

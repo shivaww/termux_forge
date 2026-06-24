@@ -4,4 +4,4 @@
 /// Barrel export for the MCP discovery agent module.
 library;
 
-export 'package:termux_forge/agents/mcp_discovery/mcp_discovery_agent.dart';
+export 'package:nexon/agents/mcp_discovery/mcp_discovery_agent.dart';
