@@ -524,14 +524,20 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
         final List<ChatMessage> historyForApi = [];
         final currentDateStr = DateTime.now().toString().substring(0, 10);
-        String systemPromptText = "The current date/year is $currentDateStr. Make sure to search for and refer to the most up-to-date information for this period (e.g. current year 2026 data, rather than outdated 2025 or earlier data unless requested).\n\n"
-            "You have powerful visual rendering capabilities! You can render the following blocks by outputting standard markdown code blocks:\n"
-            "- Mathematical equations using LaTeX: `\\[ ... \\]` or `\\( ... \\)`.\n"
-            "- Mermaid diagrams: ```mermaid\n"
-            "- SVG Graphics: ```svg\n"
-            "- Native Charts (Bar/Pie): ```chart with JSON data (e.g., {\"type\": \"bar\", \"title\": \"...\", \"data\": [{\"label\": \"...\", \"value\": 10, \"color\": \"#FF5555\"}]})\n"
+        String systemPromptText = "The current date/year is $currentDateStr. Make sure to search for and refer to the most up-to-date information for this period (e.g. current year 2026 data, rather than outdated 2025 or earlier data unless requested).\\n\\n"
+            "You have powerful visual rendering capabilities! You can render the following blocks by outputting standard markdown code blocks:\\n"
+            "- Mathematical equations using LaTeX: `\\\\[ ... \\\\]` or `\\\\( ... \\\\)`.\\n"
+            "- SVG Graphics (Use this for ALL diagrams and visuals): ```svg\n"
+            "  CRITICAL SVG MOBILE DESIGN RULES:\n"
+            "  1. Root: ALWAYS set width=\\\"100%\\\" and a tall height (e.g. 400px or 500px). NEVER use fixed pixel widths like 600px, they will get clipped.\n"
+            "  2. Padding: Add generous inner margins (at least 60px left for y-axis labels, 40px top, 40px right, 50px bottom). Do not squeeze the chart.\n"
+            "  3. Font Sizes: Axis labels MUST be 11-12px, Titles 14-16px. Smaller fonts are unreadable on mobile screens.\n"
+            "  4. Lines & Points: Stroke width of 2-2.5px on lines. Data point circles MUST be r=\\\"4\\\" with a 2px stroke. Do not make them too thin.\n"
+            "  5. Grid Lines: Use opacity=\\\"0.15\\\" or 0.2 for grid lines so they don't compete with data.\n"
+            "  6. Gradients: Use a <linearGradient> from opacity 0.4 at the top to opacity 0 at the bottom to give depth without being heavy.\n"
+            "- Native Charts (Bar/Pie): ```chart with JSON data (e.g., {\\\"type\\\": \\\"bar\\\", \\\"title\\\": \\\"...\\\", \\\"data\\\": [{\\\"label\\\": \\\"...\\\", \\\"value\\\": 10, \\\"color\\\": \\\"#FF5555\\\"}]})\n"
             "- Interactive HTML/JS Web Apps: ```html or ```javascript or ```react or ```artifact\n"
-            "CRITICAL: Whenever explaining Math, Physics, Chemistry, Data, or complex flows, AUTONOMOUSLY DECIDE to generate these visuals. Do NOT wait for the user to ask for them. Always enhance their understanding with charts, SVGs, or Mermaid diagrams when helpful. Keep visuals clean and minimal: DO NOT put long text or explanations inside the visual itself (use the normal chat text for explanations). You may use rich, beautiful colors to enhance the visual experience.\n\n";
+            "CRITICAL: Whenever explaining Math, Physics, Chemistry, Data, or complex flows, AUTONOMOUSLY DECIDE to generate these visuals. Do NOT wait for the user to ask for them. Always enhance their understanding with charts or SVGs when helpful. Keep visuals clean and minimal: DO NOT put long text or explanations inside the visual itself (use the normal chat text for explanations). You may use rich, beautiful colors to enhance the visual experience.\n\n";
         if (_agenticEnabled) {
           systemPromptText += "You have access to local Termux file system tools.\n"
               "If you need to use the local file system MCP server, output a single line: <mcp_request>{\"method\": \"...\", \"params\": {...}}</mcp_request> and stop generating.\n"
@@ -747,7 +753,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         }
 
         if (_agenticEnabled && mcpMatch != null) {
-          final mcpMatches = mcpRegex.allMatches(fullText);
+          final mcpMatches = [mcpMatch];
           for (final match in mcpMatches) {
             executedTools = true;
             String jsonString = match.group(1)?.trim() ?? '';
@@ -2760,10 +2766,7 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
           );
-        }
-        if (block.language.toLowerCase() == 'mermaid') {
-          return MermaidDiagramWidget(code: block.content);
-        }
+
         if (block.language.toLowerCase() == 'svg') {
           return SvgDiagramWidget(svgString: block.content);
         }
@@ -5476,101 +5479,6 @@ const providerCatalog = <ProviderDefinition>[
     models: ['custom-model'],
   ),
 ];
-
-class MermaidDiagramWidget extends StatefulWidget {
-  const MermaidDiagramWidget({required this.code, super.key});
-  final String code;
-
-  @override
-  State<MermaidDiagramWidget> createState() => _MermaidDiagramWidgetState();
-}
-
-class _MermaidDiagramWidgetState extends State<MermaidDiagramWidget> {
-  late final WebViewController _controller;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    final safeCode = widget.code.replaceAll('`', '\\`').replaceAll('\$', '\\\$');
-    final html = '''
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
-  <style>
-    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; margin: 0; padding: 16px; background-color: #FFFDF9; height: 100vh; }
-    .mermaid { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-  </style>
-</head>
-<body>
-  <div class="mermaid">
-    \$safeCode
-  </div>
-  <script>
-    mermaid.initialize({ startOnLoad: true, theme: 'default' });
-  </script>
-</body>
-</html>
-''';
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFFFFFDF9))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (String url) {
-            if (mounted) setState(() => _isLoading = false);
-          },
-        ),
-      )
-      ..loadHtmlString(html);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 350,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFDF9),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE7D8C4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.account_tree_outlined, size: 16, color: Color(0xFF7B4E2E)),
-                const SizedBox(width: 6),
-                const Text(
-                  'Mermaid Diagram',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF7B4E2E), fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(11), bottomRight: Radius.circular(11)),
-                  child: WebViewWidget(controller: _controller),
-                ),
-                if (_isLoading) const Center(child: CircularProgressIndicator(color: Color(0xFF7B4E2E))),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class ResearchPlanWidget extends StatefulWidget {
   const ResearchPlanWidget({required this.stateMap, required this.workspaceDir, required this.fileName, this.onStartResearch, super.key});
   final Map<String, dynamic> stateMap;
@@ -5812,24 +5720,91 @@ class _ResearchPlanWidgetState extends State<ResearchPlanWidget> {
   }
 }
 
-class HtmlArtifactWidget extends StatefulWidget {
+class HtmlArtifactWidget extends StatelessWidget {
   final String htmlContent;
   const HtmlArtifactWidget({super.key, required this.htmlContent});
 
   @override
-  State<HtmlArtifactWidget> createState() => _HtmlArtifactWidgetState();
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE7D8C4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF7F2E8),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
+              border: Border(bottom: BorderSide(color: Color(0xFFE7D8C4))),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('HTML Document', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D241C))),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FullScreenHtmlViewer(htmlContent: htmlContent),
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF7B4E2E),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    minimumSize: const Size(0, 32),
+                  ),
+                  child: const Text('View File', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 150,
+            padding: const EdgeInsets.all(12),
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Text(
+                htmlContent,
+                style: const TextStyle(fontFamily: 'monospace', color: Color(0xFFD4D4D4), fontSize: 12),
+                maxLines: 8,
+                overflow: TextOverflow.fade,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _HtmlArtifactWidgetState extends State<HtmlArtifactWidget> {
+class FullScreenHtmlViewer extends StatefulWidget {
+  final String htmlContent;
+  const FullScreenHtmlViewer({super.key, required this.htmlContent});
+
+  @override
+  State<FullScreenHtmlViewer> createState() => _FullScreenHtmlViewerState();
+}
+
+class _FullScreenHtmlViewerState extends State<FullScreenHtmlViewer> {
   late final WebViewController _controller;
   bool _isLoading = true;
-  bool _showPreview = true;
+  bool _showPreview = false;
 
   @override
   void initState() {
     super.initState();
     final html = widget.htmlContent;
-    final wrappedHtml = html.contains('<html>') ? html : '''
+    final wrappedHtml = html.contains('<html') ? html : '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -5839,7 +5814,7 @@ class _HtmlArtifactWidgetState extends State<HtmlArtifactWidget> {
   </style>
 </head>
 <body>
-  $html
+  \$html
 </body>
 </html>
 ''';
@@ -5856,72 +5831,68 @@ class _HtmlArtifactWidgetState extends State<HtmlArtifactWidget> {
       ..loadHtmlString(wrappedHtml);
   }
 
+  Future<void> _downloadFile() async {
+    try {
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save HTML File',
+        fileName: 'index.html',
+        type: FileType.custom,
+        allowedExtensions: ['html'],
+      );
+
+      if (outputFile != null) {
+        final file = File(outputFile);
+        await file.writeAsString(widget.htmlContent);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Saved to \$outputFile')));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving file: \$e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE7D8C4)),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF7F2E8),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
-              border: Border(bottom: BorderSide(color: Color(0xFFE7D8C4))),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Interactive Web App', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D241C))),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () => setState(() => _showPreview = true),
-                      style: TextButton.styleFrom(
-                        foregroundColor: _showPreview ? Colors.white : const Color(0xFF7B4E2E),
-                        backgroundColor: _showPreview ? const Color(0xFF7B4E2E) : Colors.transparent,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        minimumSize: const Size(0, 32),
-                      ),
-                      child: const Text('Preview', style: TextStyle(fontSize: 12)),
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
-                      onPressed: () => setState(() => _showPreview = false),
-                      style: TextButton.styleFrom(
-                        foregroundColor: !_showPreview ? Colors.white : const Color(0xFF7B4E2E),
-                        backgroundColor: !_showPreview ? const Color(0xFF7B4E2E) : Colors.transparent,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        minimumSize: const Size(0, 32),
-                      ),
-                      child: const Text('Code', style: TextStyle(fontSize: 12)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_showPreview ? 'Preview' : 'HTML Code'),
+        backgroundColor: const Color(0xFFF7F2E8),
+        foregroundColor: const Color(0xFF2D241C),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Color(0xFF2D241C)),
+            onSelected: (value) {
+              if (value == 'copy') {
+                Clipboard.setData(ClipboardData(text: widget.htmlContent));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied to clipboard')));
+              } else if (value == 'preview') {
+                setState(() => _showPreview = !_showPreview);
+              } else if (value == 'download') {
+                _downloadFile();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'copy', child: Text('Copy')),
+              PopupMenuItem(value: 'preview', child: Text(_showPreview ? 'Show Code' : 'Preview')),
+              const PopupMenuItem(value: 'download', child: Text('Download')),
+            ],
           ),
-          if (_showPreview)
-            SizedBox(
-              height: 400,
-              child: Stack(
-                children: [
-                  WebViewWidget(controller: _controller),
-                  if (_isLoading) const Center(child: CircularProgressIndicator(color: Color(0xFF7B4E2E))),
-                ],
-              ),
+        ],
+      ),
+      body: _showPreview
+          ? Stack(
+              children: [
+                WebViewWidget(controller: _controller),
+                if (_isLoading) const Center(child: CircularProgressIndicator()),
+              ],
             )
-          else
-            Container(
-              height: 400,
+          : Container(
               color: const Color(0xFF1E1E1E),
               width: double.infinity,
+              height: double.infinity,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -5932,8 +5903,6 @@ class _HtmlArtifactWidgetState extends State<HtmlArtifactWidget> {
                 ),
               ),
             ),
-        ],
-      ),
     );
   }
 }
@@ -6078,31 +6047,68 @@ class ChartDiagramWidget extends StatelessWidget {
   }
 }
 
-class SvgDiagramWidget extends StatelessWidget {
+class SvgDiagramWidget extends StatefulWidget {
   final String svgString;
   const SvgDiagramWidget({super.key, required this.svgString});
 
   @override
+  State<SvgDiagramWidget> createState() => _SvgDiagramWidgetState();
+}
+
+class _SvgDiagramWidgetState extends State<SvgDiagramWidget> {
+  @override
   Widget build(BuildContext context) {
-    String cleanSvg = svgString;
+    String cleanSvg = widget.svgString;
     if (cleanSvg.contains('<svg')) {
       cleanSvg = cleanSvg.substring(cleanSvg.indexOf('<svg'));
     }
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: InteractiveViewer(
-        panEnabled: true,
-        boundaryMargin: const EdgeInsets.all(20),
-        minScale: 0.1,
-        maxScale: 10.0,
-        child: Center(
-          child: SvgPicture.string(
-            cleanSvg,
-            fit: BoxFit.contain,
-            placeholderBuilder: (context) => const Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(color: Color(0xFF7B4E2E)),
+    
+    // OPTIMIZATION 1: Do not parse partial SVGs during LLM streaming.
+    // Parsing broken XML every frame causes massive CPU spikes.
+    final bool isComplete = cleanSvg.trim().endsWith('</svg>');
+    
+    if (!isComplete) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F2E8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE7D8C4)),
+        ),
+        child: Column(
+          children: const [
+            CircularProgressIndicator(color: Color(0xFF7B4E2E)),
+            SizedBox(height: 16),
+            Text("Rendering SVG...", style: TextStyle(color: Color(0xFF7B4E2E), fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+    }
+
+    return RepaintBoundary( // OPTIMIZATION 2: Isolate complex SVG repaints from the scroll view
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE7D8C4)),
+        ),
+        child: InteractiveViewer(
+          panEnabled: true,
+          boundaryMargin: const EdgeInsets.all(20),
+          minScale: 0.1,
+          maxScale: 10.0,
+          child: Center(
+            child: SvgPicture.string(
+              cleanSvg,
+              fit: BoxFit.contain,
+              placeholderBuilder: (context) => const Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(color: Color(0xFF7B4E2E)),
+              ),
             ),
           ),
         ),
