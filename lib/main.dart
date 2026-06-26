@@ -6625,8 +6625,7 @@ class ChartDiagramWidget extends StatelessWidget {
             style: TextStyle(color: Colors.red.shade400, fontSize: 12, fontFamily: 'monospace')),
       );
     }
-  }
-}}
+}
 
 
 
