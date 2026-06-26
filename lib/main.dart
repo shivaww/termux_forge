@@ -1043,7 +1043,7 @@ jobs:
 
            // Fallback: <PARAM name="key">value</PARAM> — LLMs sometimes emit this
            final paramRegex = RegExp(
-             r'<[Pp][Aa][Rr][Aa][Mm]\s+name=["\']([a-zA-Z0-9_]+)["\']\s*>([\s\S]*?)</[Pp][Aa][Rr][Aa][Mm]>',
+             r'''<[Pp][Aa][Rr][Aa][Mm]\s+name=["']([a-zA-Z0-9_]+)["']\s*>([\s\S]*?)</[Pp][Aa][Rr][Aa][Mm]>''',
            );
            for (final m in paramRegex.allMatches(xmlContent)) {
              final key = m.group(1)!.toLowerCase();
@@ -1051,7 +1051,7 @@ jobs:
            }
            // Also try <parameter name="key">value</parameter>
            final paramRegex2 = RegExp(
-             r'<[Pp]arameter\s+name=["\']([a-zA-Z0-9_]+)["\']\s*>([\s\S]*?)</[Pp]arameter>',
+             r'''<[Pp]arameter\s+name=["']([a-zA-Z0-9_]+)["']\s*>([\s\S]*?)</[Pp]arameter>''',
            );
            for (final m in paramRegex2.allMatches(xmlContent)) {
              final key = m.group(1)!.toLowerCase();
