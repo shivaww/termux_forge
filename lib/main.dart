@@ -6562,6 +6562,14 @@ class ChartDiagramWidget extends StatelessWidget {
 
 
 
+class SvgDiagramWidget extends StatefulWidget {
+  final String svgString;
+  const SvgDiagramWidget({super.key, required this.svgString});
+
+  @override
+  State<SvgDiagramWidget> createState() => _SvgDiagramWidgetState();
+}
+
 class _SvgDiagramWidgetState extends State<SvgDiagramWidget> {
   // Force-render incomplete SVGs after this many seconds (handles stuck state)
   static const _forceRenderAfterMs = 6000;
