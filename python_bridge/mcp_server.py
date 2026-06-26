@@ -408,6 +408,39 @@ class MCPServerHandler(http.server.BaseHTTPRequestHandler):
                     break
             return {"results": results}
             
+        elif method == "find_paths":
+            path = self.resolve_path(params.get('path', ''), workspace_dir)
+            pattern = params.get('pattern')
+            if not pattern:
+                return {"error": "pattern is required"}
+            target_type = params.get('type', 'both').lower()
+            results = []
+            try:
+                def scan_path(current_path):
+                    for item in current_path.iterdir():
+                        if item.name in ('.git', '.dart_tool', 'build', '.pub-cache', '__pycache__', 'node_modules'):
+                            continue
+                        
+                        # Match pattern case-insensitively
+                        if pattern.lower() in item.name.lower():
+                            rel_path = str(item.relative_to(Path(workspace_dir) if workspace_dir else Path(BASE_DIR)))
+                            is_dir = item.is_dir()
+                            if target_type == 'both':
+                                results.append({"path": rel_path, "type": "dir" if is_dir else "file"})
+                            elif target_type == 'dir' and is_dir:
+                                results.append({"path": rel_path, "type": "dir"})
+                            elif target_type == 'file' and not is_dir:
+                                results.append({"path": rel_path, "type": "file"})
+                                
+                        if len(results) >= 100:
+                            return
+                        if item.is_dir():
+                            scan_path(item)
+                scan_path(path)
+            except Exception as e:
+                return {"error": str(e)}
+            return {"results": results}
+            
         elif method in ("shell_exec", "run_command"):
             command = params.get('command')
             if not command:

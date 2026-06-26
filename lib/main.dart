@@ -514,6 +514,7 @@ jobs:
     "dir_list: path\n"
     "dir_create: path\n"
     "file_search: path,pattern\n"
+    "find_paths: path,pattern,type\n"
     "run_command: command,cwd\n\n"
     "Resume after results arrive.";
 
@@ -650,7 +651,7 @@ jobs:
               "  ❌ WRONG: <tool_use><name>file_read</name>   → wrong outer tag\n"
               "  ❌ WRONG: <function_calls><invoke>           → Anthropic format, not supported\n"
               "  ❌ WRONG: wrapped in ```xml code block       → raw XML only, no fences\n\n"
-              "RULE: param name IS the tag. <path>/foo</path> not <PARAM name=\"path\">/foo</PARAM>\n\n"
+              "CRITICAL RULE: NEVER use <PARAM name=\"...\"> or <parameter name=\"...\">. Every parameter name must be its own XML tag. Use <path>/foo</path> instead of <PARAM name=\"path\">/foo</PARAM>.\n\n"
               "Workflow (strict):\n"
               "1. Always code_search/git_diff before reading any file\n"
               "2. file_read/multi_read with line ranges only — never full file\n"
@@ -693,6 +694,8 @@ jobs:
               "symbol_search: symbol,path\n"
               "file_read: path,start_line,end_line\n"
               "dir_list: path\n"
+              "file_search: path,pattern\n"
+              "find_paths: path,pattern,type\n"
               "str_replace: path,old,new\n"
               "run_command: command,cwd\n"
               "file_write: path,content\n"
@@ -1039,22 +1042,20 @@ jobs:
            }
 
            // Fallback: <PARAM name="key">value</PARAM> — LLMs sometimes emit this
-           if (!result.containsKey('method')) {
-             final paramRegex = RegExp(
-               r'<[Pp][Aa][Rr][Aa][Mm]\s+name=["\']([a-zA-Z0-9_]+)["\']\s*>([\s\S]*?)</[Pp][Aa][Rr][Aa][Mm]>',
-             );
-             for (final m in paramRegex.allMatches(xmlContent)) {
-               final key = m.group(1)!.toLowerCase();
-               result[key] = m.group(2)!.trim();
-             }
-             // Also try <parameter name="key">value</parameter>
-             final paramRegex2 = RegExp(
-               r'<[Pp]arameter\s+name=["\']([a-zA-Z0-9_]+)["\']\s*>([\s\S]*?)</[Pp]arameter>',
-             );
-             for (final m in paramRegex2.allMatches(xmlContent)) {
-               final key = m.group(1)!.toLowerCase();
-               result[key] = m.group(2)!.trim();
-             }
+           final paramRegex = RegExp(
+             r'<[Pp][Aa][Rr][Aa][Mm]\s+name=["\']([a-zA-Z0-9_]+)["\']\s*>([\s\S]*?)</[Pp][Aa][Rr][Aa][Mm]>',
+           );
+           for (final m in paramRegex.allMatches(xmlContent)) {
+             final key = m.group(1)!.toLowerCase();
+             result[key] = m.group(2)!.trim();
+           }
+           // Also try <parameter name="key">value</parameter>
+           final paramRegex2 = RegExp(
+             r'<[Pp]arameter\s+name=["\']([a-zA-Z0-9_]+)["\']\s*>([\s\S]*?)</[Pp]arameter>',
+           );
+           for (final m in paramRegex2.allMatches(xmlContent)) {
+             final key = m.group(1)!.toLowerCase();
+             result[key] = m.group(2)!.trim();
            }
 
            if (result.containsKey('method')) {
@@ -1198,6 +1199,8 @@ jobs:
         return '📁 Creating dir ${shortPath(p('path'))}';
       case 'file_search':
         return '🔎 Searching files: ${p('pattern')}';
+      case 'find_paths':
+        return '🔎 Finding paths matching: ${p('pattern')}';
       case 'code_search':
         return '🔎 Code search: ${p('query')} in ${shortPath(p('path'))}';
       case 'symbol_search':
@@ -2394,6 +2397,8 @@ class _McpToolBlockState extends State<McpToolBlock> {
         return (Icons.create_new_folder_outlined, const Color(0xFFD97706), 'Create dir  ${shortPath(p('path'))}', null);
       case 'file_search':
         return (Icons.search, const Color(0xFF0369A1), 'Search files', p('pattern').isNotEmpty ? '\"${p('pattern')}\"' : null);
+      case 'find_paths':
+        return (Icons.find_in_page_outlined, const Color(0xFF0369A1), 'Find paths', p('pattern').isNotEmpty ? '\"${p('pattern')}\"' : null);
       case 'code_search':
         return (Icons.manage_search, const Color(0xFF0369A1), 'Code search', '\"${p('query')}\" in ${shortPath(p('path'))}');
       case 'symbol_search':
