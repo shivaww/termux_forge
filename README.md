@@ -35,7 +35,7 @@ Nexon empowers LLMs to read/write files, execute commands, perform search, build
 │                └────────────┬────────────┘                 │
 │                             │                              │
 │                             │ HTTP POST JSON               │
-│                             │ http://127.0.0.1:8390/mcp    │
+│                             │ http://127.0.0.1:8390         │
 │                             ▼                              │
 │   ┌────────────────────────────────────────────────────┐   │
 │   │           Python MCP Server (Termux Bridge)        │   │
@@ -118,8 +118,8 @@ cd ~/nexon_bridge && python3 mcp_server.py
 ```
 This runs the zero-dependency tool executor server on `http://127.0.0.1:8390`.
 
-#### 3. Build & Install the App
-To compile the Nexon APK from source:
+#### 3. Install latest apk
+
 
 
 ---
