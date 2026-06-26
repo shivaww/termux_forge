@@ -33,7 +33,7 @@ files=(
 
 for f in "${files[@]}"; do
   echo "  -> Downloading $f..."
-  curl -L -s -o "$f" "$BASE_URL/$f?v=\$(date +%s)"
+  curl -L -s -o "$f" "$BASE_URL/$f?v=$(date +%s)"
 done
 
 echo "4. Installing Python requirements..."
