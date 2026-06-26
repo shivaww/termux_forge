@@ -1,4 +1,5 @@
 # Nexon
+![GitHub Downloads (all assets)](https://img.shields.io/github/downloads/shivaww/Nexon/total?style=flat-square&color=blue)
 
 > **An AI-powered mobile coding workstation and agentic workspace** that transforms your Android device into a full-featured development workspace — powered by Flutter, Termux, and intelligent local tool routing.
 
