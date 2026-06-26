@@ -114,18 +114,13 @@ curl -sL https://github.com/shivaww/Nexon/raw/main/install_bridge.sh | bash
 
 #### 2. Start the Local Python MCP Gateway
 ```bash
-python3 ~/termux_forge/python_bridge/mcp_server.py
+cd ~/nexon_bridge && python3 mcp_server.py
 ```
-This runs the zero-dependency tool executor server on `http://127.0.0.1:8390/mcp`.
+This runs the zero-dependency tool executor server on `http://127.0.0.1:8390`.
 
 #### 3. Build & Install the App
 To compile the Nexon APK from source:
-```bash
-cd ~/termux_forge
-flutter pub get
-flutter build apk --release
-```
-Locate the compiled release APK at `build/app/outputs/flutter-apk/app-release.apk` and install it on your device.
+
 
 ---
 
