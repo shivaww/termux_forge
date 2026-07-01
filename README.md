@@ -1,24 +1,9 @@
 # Nexon
-![GitHub Downloads (all assets)](https://img.shields.io/github/downloads/shivaww/Nexon/total?style=flat-square&color=blue)
 
 > **An AI-powered mobile coding workstation and agentic workspace** that transforms your Android device into a full-featured development workspace — powered by Flutter, Termux, and intelligent local tool routing.
 
-[![Build](https://github.com/shivaww/termux_forge/actions/workflows/build.yml/badge.svg)](https://github.com/shivaww/termux_forge/actions/workflows/build.yml)
+[![Build](https://github.com/shivaww/Nexon/actions/workflows/build.yml/badge.svg)](https://github.com/shivaww/Nexon/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
----
-
-## 📋 Table of Contents
-| Section | Lines |
-|---|---|
-| Overview | L10 |
-| Architecture | L16–L54 |
-| Features | L55–L89 |
-| What's New — v1.1.0 | L~this section |
-| Getting Started | L90–L123 |
-| Tool Calling Protocol | L124–L149 |
-| Tech Stack | L150–L159 |
-| License | L160+ |
 
 ---
 
@@ -26,10 +11,10 @@
 
 ### 🛡️ Shell Command Permission System
 Before the AI executes any shell command, the app now shows a native permission dialog — just like professional IDEs (VS Code, Android Studio):
-- **Yes** — allow this one command
-- **This chat** — allow all commands for the current session
-- **Always ✓** — remember and never ask again (saved to device storage)
-- **No** — block execution, AI receives a denial error and can recover
+- **Yes** — allow this one command.
+- **This chat** — allow all commands for the current session.
+- **Always ✓** — remember and never ask again (saved to device storage).
+- **No** — block execution, AI receives a denial error and can recover.
 
 Permission preference is persisted via `SharedPreferences` (`shell_permission_v1`) and loaded on every app start.
 
@@ -43,24 +28,23 @@ Both paths (XML and JSON RPC) are supported simultaneously.
 
 ### 🗂️ Workspace-Aware Command Execution
 All shell commands now correctly run inside the **user-configured workspace directory**:
-- `cwd` is automatically injected as `_agenticWorkspace` if not explicitly set
-- Both dispatch blocks (main chat + deep research) inject `workspace_dir` AND `cwd`
-- Path resolution in `mcp_server.py` fixed: no more double-prefix bug when workspace is a subdirectory of Termux home
+- `cwd` is automatically injected as `_agenticWorkspace` if not explicitly set.
+- Both dispatch blocks (main chat + deep research) inject `workspace_dir` AND `cwd`.
+- Path resolution in `mcp_server.py` fixed: no more double-prefix bug when workspace is a subdirectory of Termux home.
 
 ### 🧠 Upgraded Agentic System Prompt
 The agentic system prompt is now concise and structured:
-- **CORE RULE**: one `<command>` per turn, stop and wait
-- **SHELL TOOLKIT**: full list of available Termux tool categories
-- **QUALITY STANDARDS**: read before edit, verify after edit, no placeholders
-- **PROJECT DOCUMENTATION**: AI automatically maintains `README.md` with a Table of Contents (line ranges) for every project
+- **CORE RULE**: one `<command>` per turn, stop and wait.
+- **SHELL TOOLKIT**: full list of available Termux tool categories.
+- **QUALITY STANDARDS**: read before edit, verify after edit, no placeholders.
+- **PROJECT DOCUMENTATION**: AI automatically maintains `README.md` with a Table of Contents (line ranges) for every project.
 
 ### 🔄 Path Resolution Fixes (`mcp_server.py`)
-- `~/` expands to the configured workspace (not Termux root)
-- Absolute Termux paths no longer get double-prefixed when workspace is a subdir
-- `resolve_path()` correctly guards against remapping paths already inside the workspace
+- `~/` expands to the configured workspace (not Termux root).
+- Absolute Termux paths no longer get double-prefixed when workspace is a subdir.
+- `resolve_path()` correctly guards against remapping paths already inside the workspace.
 
 ---
-
 
 ## Overview
 
@@ -90,7 +74,7 @@ Nexon empowers LLMs to read/write files, execute commands, perform search, build
 │                └────────────┬────────────┘                 │
 │                             │                              │
 │                             │ HTTP POST JSON               │
-│                             │ http://127.0.0.1:8390         │
+│                             │ http://127.0.0.1:8390/mcp    │
 │                             ▼                              │
 │   ┌────────────────────────────────────────────────────┐   │
 │   │           Python MCP Server (Termux Bridge)        │   │
@@ -173,13 +157,12 @@ cd ~/nexon_bridge && python3 mcp_server.py
 ```
 This runs the zero-dependency tool executor server on `http://127.0.0.1:8390`.
 
-#### 3. Install latest apk
-
-
+#### 3. Install Latest APK
+Build from source or download the generated release APK directly from the [GitHub Actions Artifacts](https://github.com/shivaww/Nexon/actions) tab of your latest workflow build run.
 
 ---
 
-## Tool calling Protocol
+## Tool Calling Protocol
 
 Nexon uses structured XML tags inside standard LLM text completions to trigger local device tool executions. The model outputs exactly one tool request per turn, halts generation, and waits for results.
 
